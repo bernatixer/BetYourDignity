@@ -56,7 +56,7 @@
     };
 
     var game = new Phaser.Game(config);
-    var player1, player2, cursor, bullets;
+    var player1, player2, cursor, bullets, group;
     var leftHearts, rightHearts;
     var leftScore, rightScore;
     var curPlayerDirection; 
@@ -80,7 +80,7 @@
         cursors = this.input.keyboard.createCursorKeys();
         // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
 
-        var group = this.physics.add.group({
+        group = this.physics.add.group({
             bounceX: false,
             bounceY: false,
             collideWorldBounds: true,
@@ -166,18 +166,17 @@
                 Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
                 this.speed = 0;
                 this.born = 0;
-                console.log(this);
+                //console.log(this);
             },
 
             fire: function (player)
             {
-
+                //console.log(game);
                 this.setPosition(<%= currPlayer %>.x, <%= currPlayer %>.y);
                 if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000 , 1);
                 else this.speed = Phaser.Math.GetSpeed(-1000 , 1);
                 this.body.allowGravity = false;
                 this.born = 0;
-                //physics.add.collider(bullet, group);
             },
 
             update: function (time, delta)
@@ -197,9 +196,11 @@
         bullets = this.physics.add.group({ 
             classType: Bullet, 
             runChildUpdate: true, 
-            collide: false,
+            collide: true,
             collideWorldBounds: true,
         });
+
+        //console.log(this);
 
     }
 
@@ -224,13 +225,15 @@
 
         if (cursors.space.isDown && time > this.lastFired)
         {
-            console.log(this);
+            //console.log(this);
             var bullet = bullets.get();
             bullet.setActive(true);
             bullet.setVisible(true);
 
             if (bullet)
             {
+                console.log(this.physics);
+                this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);          
                 this.sound.add('shootAudio').play();
                 bullet.fire(player1);
                 this.lastFired = time + 300;
@@ -255,5 +258,19 @@
         //     player2.y = locations.player2.y;
         // }
     }
+
+
+    function mycollisionHandler(bullet, group) {
+        // note, parameters grnd and rainspr represent the sprites that have collided
+        console.log("hello");
+        //Handle heart destroy && Instagram stuff :) 
+        bullet.destroy();
+    }
+
+    function notCurrentPlayer() {
+        if (<%= currPlayer %> === player1) return player2;
+        else return player1;
+    }
+
 </script>
 </body>
