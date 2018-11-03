@@ -63,6 +63,7 @@
     var that;
 
     function preload() {
+        that = this;
         this.load.image('A', 'a.png');
         this.load.image('B', 'b.png');
         this.load.image('heart', 'corazon.png');
@@ -75,8 +76,7 @@
 
     function create() {
         that = this;
-        var music = this.sound.add('bgAudio');
-        music.play({
+        this.sound.add('bgAudio').play({
             loop: true
         });
 
@@ -114,12 +114,11 @@
                 x: 2,
                 y: 2
             },
-            setXY:
-                {
-                    x: 45,
-                    y: 65,
-                    stepX: 40
-                }
+            setXY: {
+                x: 45,
+                y: 65,
+                stepX: 40
+            }
         });
 
         rightHearts = this.add.group({
@@ -129,12 +128,11 @@
                 x: 2,
                 y: 2
             },
-            setXY:
-                {
-                    x: 600,
-                    y: 65,
-                    stepX: 40
-                }
+            setXY: {
+                x: 600,
+                y: 65,
+                stepX: 40
+            }
         });
 
         // Textos
