@@ -8,7 +8,7 @@ var Instagram = require('node-instagram').default;
 //   next();
 // });
 
-const redirectUri = 'http://localhost:3000/auth/instagram/callback';
+const redirectUri = 'http://localhost:' + process.env.PORT + '/auth/instagram/callback';
 
 const instagram = new Instagram({
     clientId: process.env.CLIENT_ID,
@@ -30,6 +30,7 @@ router.get('/auth/instagram/callback', async (req, res) => {
         const data = await instagram.authorizeUser(req.query.code, redirectUri);
         // access_token in data.access_token
         res.json(data);
+        console.log(data.access_token);
     } catch (err) {
         res.json(err);
     }
