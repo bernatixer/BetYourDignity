@@ -51,7 +51,7 @@ io.on('connection', function (socket) {
 });
 
 app.get('/play', function (req, res) {
-    res.render('play');
+    res.render('play', { currPlayer: "player1" });
 });
 
 app.get('/', function (req, res) {

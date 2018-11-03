@@ -44,12 +44,16 @@
         scene: {
             preload: preload,
             create: create,
-            update: update
+            update: update,
+            extend: {
+                bullets: null,
+                lastFired: 0
+            }
         }
     };
 
     var game = new Phaser.Game(config);
-    var player1, player2, cursors;
+    var player1, player2, cursor, bullets;
     var leftHearts, rightHearts;
     var leftScore, rightScore;
 
@@ -139,9 +143,56 @@
         rightScore.setShadow(2, 2, 'rgba(0,0,0,0.5)', 5);
         rightScore.setOrigin(1, 0.5);
 
+                /* Bullets */
+
+        var Bullet = new Phaser.Class({
+
+            Extends: Phaser.GameObjects.Image,
+
+            initialize:
+
+            function Bullet (scene)
+            {
+                Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+                this.speed = 0;
+                this.born = 0;
+                console.log(this);
+            },
+
+            fire: function (player)
+            {
+
+                this.setPosition(player.x, player.y);
+                this.speed = Phaser.Math.GetSpeed(1000 , 1);
+                this.body.allowGravity = false;
+                this.born = 0;
+                //physics.add.collider(bullet, group);
+            },
+
+            update: function (time, delta)
+            {
+                this.x += this.speed * delta;
+                this.born += delta;
+
+                if (this.born > 1000)
+                {
+                    this.setActive(false);
+                    this.setVisible(false);
+                }
+            }
+
+        });
+
+        bullets = this.physics.add.group({ 
+            classType: Bullet, 
+            runChildUpdate: true, 
+            collide: false,
+            collideWorldBounds: true,
+        });
+
     }
 
-    function update() {
+    function update(time) {
         // socket.emit('currPosition', { x: <%= currPlayer %>.x, y: <%= currPlayer %>.y });
         // player1.setVelocity(0);
 
@@ -156,6 +207,20 @@
         if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
             socket.emit('move', { action: 'vertical', dir: -600});
             <%= currPlayer %>.setVelocityY(-600);
+        }
+
+        if (cursors.space.isDown && time > this.lastFired)
+        {
+            console.log(this);
+            var bullet = bullets.get();
+            bullet.setActive(true);
+            bullet.setVisible(true);
+
+            if (bullet)
+            {
+                bullet.fire(player1);
+                this.lastFired = time + 300;
+            }
         }
 
         socket.on('move', function (data) {
@@ -178,5 +243,3 @@
     }
 </script>
 </body>
-
-</html>
