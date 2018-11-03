@@ -4,7 +4,7 @@ var app = express();
 var cookieParser = require('cookie-parser');
 
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname + '/client'));
+app.use(express.static(__dirname + '/static'));
 app.use(cookieParser());
 app.use(require('./routes'));
 
