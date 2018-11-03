@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var Instagram = require('node-instagram').default;
-var cookieParser = require('cookie-parser');
 
 // //Middle ware that is specific to this router
 // router.use(function timeLog(req, res, next) {
@@ -19,7 +18,7 @@ const instagram = new Instagram({
 router.get('/', function (req, res) {
     var acces_token = req.cookies.acces_token;
     if (acces_token != null) {
-        res.render('play', { token: acces_token});
+        res.render('game');
     } else {
         res.render('start');
     }
