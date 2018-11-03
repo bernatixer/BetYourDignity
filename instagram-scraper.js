@@ -1,6 +1,4 @@
 var Client = require('instagram-private-api').V1;
-var Media = Client.Media;
-var Request = Client.Request;
 
 const getMidPicture = function(pictures, def) {
     const defaultPic = { url: def, height: 150, width: 150 };
@@ -63,29 +61,42 @@ const getCurrentAccount = function(sessionId, callback, error) {
     }, error);
 }
 
-const getAccountMedia = function(sessionId) {
+const getAccountMedia = function(sessionId, callback) {
     getSession(sessionId, function(session) {
         getCurrentAccount(sessionId, function(account) {
             var feed = new Client.Feed.UserMedia(session, account.params.id, 100);
             feed.get().then(function(media) {
-                console.log(media);
+                const mediaList = media
+                    .map(function(mediaItem) { return mediaItem.getParams(); })
+                    .map(reduceMediaObject)
+                callback(mediaList);
             });
         })
     });
 }
 
-// Media.getAll = function (session) {
-//     return new Request(session)
-//         .setMethod('GET')
-//         .setResource('mediaInfo', {mediaId: ''})
-//         .send()
-//         .then(function(json) {
-//             return json;
-//             // return new Media(session, json)
-//         });
-// }
+const reduceMediaObject = function(media) {
+    var image = media.images.filter(function(pic) { return pic.width < 400 })[0] || media.images[0];
+    return {
+        id: media.id,
+        caption: media.caption,
+        image: image,
+        username: media.user.username
+    }
+}
 
-getAccountMedia('5zuzqhobp35')
+const like = function(sessionId, mediaId) {
+    getSession(sessionId, function(session) {
+        Client.Like.create(session, mediaId);
+    })
+}
 
+getCurrentSessionAccount('5zuzqhobp35', function(sessionAccount) {
+    const sessionId = sessionAccount.sessionId;
+    console.log(sessionAccount);
+    getAccountMedia(sessionId, function(media) {
+        like(sessionId, media[0].id);
+    })
+})
 
-module.exports = { login, getCurrentSessionAccount };
+module.exports = { login, getCurrentSessionAccount, getAccountMedia };
