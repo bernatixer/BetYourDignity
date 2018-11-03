@@ -29,9 +29,11 @@ function getRooms() {
 }
 
 io.on('connection', function (socket) {
+    socket.emit('setRooms', getRooms());
     var token = cookie.parse(socket.handshake.headers.cookie).acces_token;
     var playerNum = game[token];
-    // var playerLoc;
+    var sessionInfo;
+    
     socket.on('move', function (data) {
         if (data.action == 'horizontal') {
             if (playerNum == 1) socket.broadcast.emit('move', { action: 'horizontal', player: playerNum, dir: data.dir });
@@ -44,16 +46,25 @@ io.on('connection', function (socket) {
 
     socket.on('loggin', function (data) {
         login(data.username, data.password, function(sessionAccount) {
-            console.log(sessionAccount.account.username);
-            game.username = sessionAccount.account.username;
-            game.img = sessionAccount.account.profilePicture.url;
+            sessionInfo = sessionAccount;
             socket.emit('loggin', { sessionId: sessionAccount.sessionId, rooms: getRooms() });
         })
     });
 
-    // socket.on('currPosition', function (location) {
-    //     playerLoc = location;
-    // });
+    socket.on('newRoom', function (roomName) {
+        game.name = roomName;
+        game.img = sessionInfo.account.profilePicture.url;
+        game.username = sessionInfo.account.username;
+        if (game.status == status.EMPTY) {
+            game[token] = 1;
+            game.status = status.WAITING;
+        } else if (game.status == status.WAITING) {
+            game[token] = 2;
+            game.status = status.FULL;
+        }
+        socket.emit('setRooms', getRooms());
+    });
+
 });
 
 app.get('/home', function (req, res) {

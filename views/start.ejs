@@ -87,12 +87,35 @@
         </p>
         <div id="rooms_list">
 
-<a id="sphynxsheldon" name="join_room" onclick="joinRoom('sphynxsheldon')">
-<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">
-<figure class="image is-64x64" style="background-color: #05cf05;"></figure></figure>
-</div><div class="media-content"><div class="content"><p><strong>Sphynx's game</strong><small>waiting</small><br>
-<strong>Player 1:</strong> sphynxsheldon<br><strong>Player 2:</strong></p></div></div><div class="media-right"><br/>
-<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>
+          <a id="sphynxsheldon" name="join_room" onclick="joinRoom('sphynxsheldon')">
+            <div class="box">
+              <article class="media">
+                <div class="media-left">
+                  <figure class="image is-64x64">
+                    <figure class="image is-64x64" style="background-color: #05cf05;"></figure>
+                  </figure>
+                </div>
+                <div class="media-content">
+                  <div class="content">
+                    <p>
+                      <strong>Sphynx's game</strong>
+                      <small>waiting</small>
+                      <br>
+                      <strong>Player 1:</strong> sphynxsheldon
+                      <br>
+                      <strong>Player 2:</strong>
+                    </p>
+                  </div>
+                </div>
+                <div class="media-right">
+                  <br/>
+                  <span style="color: black">
+                    <i class="fa fa-play"></i>
+                  </span>
+                </div>
+              </article>
+            </div>
+          </a>
 
           <br/>
         </div>
@@ -153,15 +176,23 @@
       setRooms(data.rooms);
       document.cookie = "sessionId=" + data.sessionId;
     });
-    setRooms(rooms) {
-      var room = rooms[0];
-      $('#rooms_list').append('<a id="' + room.username +'" name="join_room" onclick="joinRoom(' + room.username + ')">'+
-      '<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">'+
-      '<figure class="image is-64x64" style="background-image: "' + room.url + '";"></figure></figure>'+
-      '</div><div class="media-content"><div class="content"><p><strong>' + room.username +'\' game</strong><small>waiting</small><br>'+
-      '<strong>Player 1:</strong> ' + room.username +'<br><strong>Player 2:</strong> ' +  +'</p></div></div><div class="media-right"><br/>'+
-      '<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>');
+    socket.on('setRooms', function (rooms) {
+      setRooms(rooms);
+    })
+
+    function setRooms(rooms) {
+      console.log(rooms);
+      $('#rooms_list').text('');
+      for (let i = 0; i < rooms.length; ++i) {
+      $('#rooms_list').append('<a id="' + room.username + '" name="join_room" onclick="joinRoom(' + room.username + ')">' +
+        '<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">' +
+        '<figure class="image is-64x64"><img src="' + room.img + '" /></figure></figure>' +
+        '</div><div class="media-content"><div class="content"><p><strong>' + room.name + '</strong> <small>waiting</small><br>' +
+        '<strong>Player 1:</strong> ' + room.username + '<br><strong>Player 2:</strong> ' + "" + '</p></div></div><div class="media-right"><br/>' +
+        '<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>'); 
+      }
     };
+
     jQuery(document).ready(function ($) {
 
       $('#loader_content').keypress(function (e) {
@@ -191,6 +222,10 @@
         socket.emit('loggin', { username: $('#username').val(), password: $('#password').val() });
         $('#loader_content').hide();
         $('#loader').show();
+      });
+
+      $('#create_room_button').on('click', function (e) {
+        socket.emit('newRoom', $('#room_name').val());
       });
 
     });
