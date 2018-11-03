@@ -15,6 +15,9 @@ const instagram = new Instagram({
     clientSecret: process.env.CLIENT_SECRET,
 });
 
+router.get('/play', function (req, res) {
+    res.render('play');
+});
 router.get('/', function (req, res) {
     var acces_token = req.cookies.acces_token;
     if (acces_token != null) {
