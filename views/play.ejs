@@ -60,6 +60,7 @@
     var leftHearts, rightHearts;
     var leftScore, rightScore;
     var curPlayerDirection; 
+    var that;
 
     function preload() {
         this.load.image('A', 'a.png');
@@ -69,10 +70,11 @@
         this.load.image('menu', 'menu.png');
         this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
         this.load.audio('shootAudio', ['sounds/shoot.mp3']);
+        this.load.audio('dieAudio', ['sounds/muerte.mp3']);
     }
 
     function create() {
-
+        that = this;
         var music = this.sound.add('bgAudio');
         music.play();
 
@@ -233,7 +235,7 @@
             if (bullet)
             {
                 console.log(this.physics);
-                this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);          
+                this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
                 this.sound.add('shootAudio').play();
                 bullet.fire(player1);
                 this.lastFired = time + 300;
@@ -241,13 +243,14 @@
         }
 
         socket.on('move', function (data) {
-            if (data.action == 'horizontal') {
-                if (data.player == 1) player1.setVelocityX(data.dir);
-                else if (data.player == 2) player2.setVelocityX(data.dir);
-            } else if (data.action == 'vertical') {
-                if (data.player == 1) player1.setVelocityY(data.dir);
-                else if (data.player == 2) player2.setVelocityY(data.dir);
+            if (data.action === 'horizontal') {
+                if (data.player === 1) player1.setVelocityX(data.dir);
+                else if (data.player === 2) player2.setVelocityX(data.dir);
+            } else if (data.action === 'vertical') {
+                if (data.player === 1) player1.setVelocityY(data.dir);
+                else if (data.player === 2) player2.setVelocityY(data.dir);
             }
+
             update();
         });
         
@@ -261,9 +264,22 @@
 
 
     function mycollisionHandler(bullet, group) {
-        // note, parameters grnd and rainspr represent the sprites that have collided
-        console.log("hello");
-        //Handle heart destroy && Instagram stuff :) 
+
+        var actual = <%= currPlayer %>;
+        if (actual === player1) {
+            var vidasRestantes = rightHearts.children.entries.length;
+
+            if (vidasRestantes > 0) {
+                that.sound.add('dieAudio').play();
+                rightHearts.children.entries[0].destroy();
+                --vidasRestantes;
+            }
+
+            if (vidasRestantes === 0) {
+                alert("hey, has ganao pavo, player1");
+            }
+
+        }
         bullet.destroy();
     }
 
