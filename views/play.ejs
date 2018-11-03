@@ -76,7 +76,9 @@
     function create() {
         that = this;
         var music = this.sound.add('bgAudio');
-        music.play();
+        music.play({
+            loop: true
+        });
 
         // Create players
         cursors = this.input.keyboard.createCursorKeys();
