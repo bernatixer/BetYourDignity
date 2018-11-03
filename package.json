@@ -22,6 +22,7 @@
     "dotenv": "^6.1.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
+    "instagram-private-api": "^0.6.8",
     "node-instagram": "^4.2.0",
     "socket.io": "^2.1.1"
   }
