@@ -1,13 +1,163 @@
+<!DOCTYPE html>
 <html>
 
 <head>
-    <title>BetYourDignity</title>
+  <meta charset="utf-8">
+  <title>BetYourDignity</title>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.1/css/bulma.min.css" />
+
+  <style type="text/css">
+    #div1 {
+      display: inline-block;
+      width: 10vw;
+      height: 10vw;
+      background-color: #6469b5;
+    }
+
+    #div2 {
+      display: inline-block;
+      width: 10vw;
+      height: 10vw;
+      background-color: #6469b5;
+    }
+
+    table {
+      table-layout: fixed;
+      background-color: #6469b5;
+    }
+
+    td {
+      width: 33%;
+      height: 33%;
+      background-color: #6469b5;
+    }
+  </style>
+
 </head>
 
 <body>
-    <div>
-        <button><a href="/auth/instagram">START</a></button>
+
+  <section id="login" class="hero is-primary is-fullheight has-text-centered">
+    <div class="hero-body">
+      <div class="container">
+        <div class="columns is-mobile">
+          <div class="column is-half is-offset-one-quarter">
+            <div class="card">
+              <br/>
+              <h1 class="title is-1">
+                <span style="color: #462929">Bet</span>
+                <span style="color: #9f73fc">Your</span>
+                <span style="color: #fc7373">Dignity</span>
+              </h1>
+              <img id="loader" src="loader.gif" style="display: none;"/>
+              <div id="loader_content" class="card-content">
+                <div class="content">
+                  <form>
+                    <p class="control">
+                      <input id="username" class="input has-text-centered" type="text" placeholder="Username">
+                    </p>
+                    <p class="control">
+                      <input id="password" class="input has-text-centered" type="password" placeholder="Password">
+                    </p>
+                    <a id="play_button" class="button is-primary is-outlined is-large">
+                      <span class="icon">
+                        <i class="fa fa-play"></i>
+                      </span>&nbsp;Play
+                    </a>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <section id="rooms" class="hero is-primary is-fullheight has-text-centered" style="display: none;">
+    <div class="hero-head">
+      <div class="container">
+        <br/>
+        <p>
+          <h1 class="title is-1">Rooms</h1>
+        </p>
+        <div id="rooms_list"></div>
+      </div>
+    </div>
+
+    <div class="hero-foot">
+      <div class="container">
+        <a class="modal-button" data-target="#create_room">
+          <div class="box is-success">
+            <h1 class="title is-1" style="color: black">
+              <span>
+                <i class="fa fa-plus"></i>
+              </span> Create Room</h1>
+          </div>
+        </a>
+      </div>
+      <br/>
+    </div>
+  </section>
+
+  <div id="create_room" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Create Room</p>
+        <button class="delete"></button>
+      </header>
+      <section class="modal-card-body">
+        <p class="control">
+          <form id="create_room_form" class="has-text-centered">
+            <input id="room_name" class="input has-text-centered" type="text" placeholder="Room name">
+            <br/>
+            <br/>
+            <a id="create_room_button" class="button is-primary">Create</a>
+          </form>
+        </p>
+      </section>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    socket.on('loggin', function (data) {
+      $('#loader_content').show();
+      $('#loader').hide();
+      $('#login').hide();
+      $('#rooms').show();
+      document.cookie = "sessionId=" + data.sessionId;
+    });
+    jQuery(document).ready(function ($) {
+
+      $('.modal-button').click(function () {
+        var target = $(this).data('target');
+        $('html').addClass('is-clipped');
+        $(target).addClass('is-active');
+      });
+
+      $('.modal-background, .modal-close').click(function () {
+        $('html').removeClass('is-clipped');
+        $(this).parent().removeClass('is-active');
+      });
+
+      $('.modal-card-head .delete, .modal-card-foot .button').click(function () {
+        $('html').removeClass('is-clipped');
+        $('#create_room').removeClass('is-active');
+      });
+
+      $('#play_button').on('click', function (e) {
+        socket.emit('loggin', { username: $('#username').val(), password: $('#password').val() });
+        $('#loader_content').hide();
+        $('#loader').show();
+      });
+    });
+  </script>
 </body>
 
 </html>

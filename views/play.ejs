@@ -40,6 +40,9 @@
                 gravity: {y: 600}
             }
         },
+        audio: {
+            // disableWebAudio: true
+        },
         backgroundColor: '#2d2d2d',
         scene: {
             preload: preload,
@@ -64,9 +67,15 @@
         this.load.image('heart', 'corazon.png');
         this.load.image('back', 'back.png');
         this.load.image('menu', 'menu.png');
+        this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
+        this.load.audio('shootAudio', ['sounds/shoot.mp3']);
     }
 
     function create() {
+
+        var music = this.sound.add('bgAudio');
+        music.play();
+
         // Create players
         cursors = this.input.keyboard.createCursorKeys();
         // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -222,6 +231,7 @@
 
             if (bullet)
             {
+                this.sound.add('shootAudio').play();
                 bullet.fire(player1);
                 this.lastFired = time + 300;
             }
