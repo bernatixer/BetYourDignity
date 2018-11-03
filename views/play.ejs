@@ -26,8 +26,9 @@
 <div id="phaser-example"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.min.js"></script>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
+    var socket = io();
     var config = {
         type: Phaser.AUTO,
         width: 800,
@@ -141,17 +142,39 @@
     }
 
     function update() {
+        // socket.emit('currPosition', { x: <%= currPlayer %>.x, y: <%= currPlayer %>.y });
+        // player1.setVelocity(0);
+
         if (cursors.left.isDown) {
-            player1.setVelocityX(-200);
+            socket.emit('move', { action: 'horizontal', dir: -200});
+            <%= currPlayer %>.setVelocityX(-200);
         }
         else if (cursors.right.isDown) {
-            player1.setVelocityX(200);
+            socket.emit('move', { action: 'horizontal', dir: 200});
+            <%= currPlayer %>.setVelocityX(200);
         }
         if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
-            player1.setVelocityY(-600);
+            socket.emit('move', { action: 'vertical', dir: -600});
+            <%= currPlayer %>.setVelocityY(-600);
         }
 
-
+        socket.on('move', function (data) {
+            if (data.action == 'horizontal') {
+                if (data.player == 1) player1.setVelocityX(data.dir);
+                else if (data.player == 2) player2.setVelocityX(data.dir);
+            } else if (data.action == 'vertical') {
+                if (data.player == 1) player1.setVelocityY(data.dir);
+                else if (data.player == 2) player2.setVelocityY(data.dir);
+            }
+            update();
+        });
+        
+        // socket.on('synchronize', function (locations) {
+        //     player1.x = locations.player1.x;
+        //     player1.y = locations.player1.y;
+        //     player2.x = locations.player2.x;
+        //     player2.y = locations.player2.y;
+        // }
     }
 </script>
 </body>
