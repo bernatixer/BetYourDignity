@@ -9,7 +9,7 @@ const makeSessionId = function() {
     return Math.random().toString(36).substring(2, 18);
 }
 
-const getSessionAccount = function(sessionId, params) {
+const buildSessionAccount = function(sessionId, params) {
     picture = getMidPicture(params.hdProfilePicVersions, params.profilePicUrl);
     return {
         sessionId: sessionId,
@@ -31,7 +31,7 @@ const login = function(username, password, callback) {
         .then(function(session) {
             session.getAccount().then(function(account) {
                 const params = account.params;
-                callback(getSessionAccount(sessionId, params));
+                callback(buildSessionAccount(sessionId, params));
             });
         });
 }
@@ -49,7 +49,7 @@ const getSession = function(sessionId, callback, error) {
 
 const getCurrentSessionAccount = function(sessionId, callback, error) {
     getCurrentAccount(sessionId, function(account) {
-        callback(getSessionAccount(sessionId, account.params))
+        callback(buildSessionAccount(sessionId, account.params))
     }, error);
 }
 
@@ -62,16 +62,14 @@ const getCurrentAccount = function(sessionId, callback, error) {
 }
 
 const getAccountMedia = function(sessionId, callback) {
-    getSession(sessionId, function(session) {
-        getCurrentAccount(sessionId, function(account) {
-            var feed = new Client.Feed.UserMedia(session, account.params.id, 100);
-            feed.get().then(function(media) {
-                const mediaList = media
-                    .map(function(mediaItem) { return mediaItem.getParams(); })
-                    .map(reduceMediaObject)
-                callback(mediaList);
-            });
-        })
+    getSessionAccount(sessionId, function(session, account) {
+        var feed = new Client.Feed.UserMedia(session, account.params.id, 100);
+        feed.get().then(function(media) {
+            const mediaList = media
+                .map(function(mediaItem) { return mediaItem.getParams(); })
+                .map(reduceMediaObject)
+            callback(mediaList);
+        });
     });
 }
 
@@ -79,24 +77,56 @@ const reduceMediaObject = function(media) {
     var image = media.images.filter(function(pic) { return pic.width < 400 })[0] || media.images[0];
     return {
         id: media.id,
-        caption: media.caption,
+        description: media.caption,
         image: image,
         username: media.user.username
+    }
+}
+
+const reduceFollowerObject = function(follower) {
+    return {
+        id: follower.id,
+        description: follower.fullName,
+        image: {
+            height: 150,
+            width: 150,
+            url: follower.profilePicUrl
+        },
+        username: follower.username
     }
 }
 
 const like = function(sessionId, mediaId) {
     getSession(sessionId, function(session) {
         Client.Like.create(session, mediaId);
-    })
+    });
 }
 
-getCurrentSessionAccount('5zuzqhobp35', function(sessionAccount) {
-    const sessionId = sessionAccount.sessionId;
-    console.log(sessionAccount);
-    getAccountMedia(sessionId, function(media) {
-        like(sessionId, media[0].id);
-    })
-})
+const getSessionAccount = function(sessionId, callback) {
+    getSession(sessionId, function(session) {
+        getCurrentAccount(sessionId, function(account) {
+            callback(session, account);
+        });
+    });
+}
 
-module.exports = { login, getCurrentSessionAccount, getAccountMedia };
+
+const getFollowers = function(sessionId, callback) {
+    getSessionAccount(sessionId, function(session, account) {
+        var accountFollowers = new Client.Feed.AccountFollowers(session, account.params.id, 100);
+        accountFollowers.get().then(function(followers) {
+            const followersList = followers
+                .map(function(follower) { return follower.getParams(); })
+                .map(reduceFollowerObject)
+            callback(followersList);
+        });
+    });
+}
+
+const follow = function(sessionId, followerId) {
+    getSession(sessionId, function(session) {
+        Client.Relationship.create(session, followerId);
+    });
+}
+
+module.exports = { login, getCurrentSessionAccount, getAccountMedia, like, getFollowers, follow };
