@@ -20,6 +20,7 @@
   "dependencies": {
     "dotenv": "^6.1.0",
     "express": "^4.16.4",
-    "node-instagram": "^4.2.0"
+    "node-instagram": "^4.2.0",
+    "socket.io": "^2.1.1"
   }
 }

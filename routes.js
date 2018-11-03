@@ -16,7 +16,7 @@ const instagram = new Instagram({
 });
 
 router.get('/', function (req, res) {
-    res.send('Hello World!');
+    res.sendFile(__dirname + '/client/start.html');
 });
 
 // Redirect user to instagram oauth
