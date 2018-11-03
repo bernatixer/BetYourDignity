@@ -56,6 +56,7 @@
     var player1, player2, cursor, bullets;
     var leftHearts, rightHearts;
     var leftScore, rightScore;
+    var curPlayerDirection; 
 
     function preload() {
         this.load.image('A', 'a.png');
@@ -163,7 +164,8 @@
             {
 
                 this.setPosition(player.x, player.y);
-                this.speed = Phaser.Math.GetSpeed(1000 , 1);
+                if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000 , 1);
+                else this.speed = Phaser.Math.GetSpeed(-1000 , 1);
                 this.body.allowGravity = false;
                 this.born = 0;
                 //physics.add.collider(bullet, group);
@@ -199,10 +201,12 @@
         if (cursors.left.isDown) {
             socket.emit('move', { action: 'horizontal', dir: -200});
             <%= currPlayer %>.setVelocityX(-200);
+            curPlayerDirection = false;
         }
         else if (cursors.right.isDown) {
             socket.emit('move', { action: 'horizontal', dir: 200});
-            <%= currPlayer %>.setVelocityX(200);
+            <%= currPlayer %>.setVelocityX(200); 
+            curPlayerDirection  = true;
         }
         if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
             socket.emit('move', { action: 'vertical', dir: -600});
