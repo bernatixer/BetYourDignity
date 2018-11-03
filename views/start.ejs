@@ -86,31 +86,14 @@
           <h1 class="title is-1">Rooms</h1>
         </p>
         <div id="rooms_list">
-          <a id="'+key+'" name="join_room" onclick="'+key2+'">
-            <div class="box">
-              <article class="media">
-                <div class="media-left">
-                  <figure class="image is-64x64">
-                    <figure class="image is-64x64" style="background-color: #05cf05;"></figure>
-                  </figure>
-                </div>
-                <div class="media-content">
-                  <div class="content">
-                    <p>
-                      <strong>Sphynx's game</strong>
-                      <small>waiting</small>
-                      <br>Players: </p>
-                  </div>
-                </div>
-                <div class="media-right">
-                  <br/>
-                  <span style="color: black">
-                    <i class="fa fa-play"></i>
-                  </span>
-                </div>
-              </article>
-            </div>
-          </a>
+
+<a id="sphynxsheldon" name="join_room" onclick="joinRoom('sphynxsheldon')">
+<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">
+<figure class="image is-64x64" style="background-color: #05cf05;"></figure></figure>
+</div><div class="media-content"><div class="content"><p><strong>Sphynx's game</strong><small>waiting</small><br>
+<strong>Player 1:</strong> sphynxsheldon<br><strong>Player 2:</strong></p></div></div><div class="media-right"><br/>
+<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>
+
           <br/>
         </div>
       </div>
@@ -157,7 +140,7 @@
       var parts = value.split("; " + name + "=");
       if (parts.length == 2) return parts.pop().split(";").shift();
     }
-    if (getCookie('sessionId' != null)) {
+    if (getCookie('sessionId') != null) {
       $('#login').hide();
       $('#rooms').show();
     }
@@ -167,9 +150,26 @@
       $('#loader').hide();
       $('#login').hide();
       $('#rooms').show();
+      setRooms(data.rooms);
       document.cookie = "sessionId=" + data.sessionId;
     });
+    setRooms(rooms) {
+      var room = rooms[0];
+      $('#rooms_list').append('<a id="' + room.username +'" name="join_room" onclick="joinRoom(' + room.username + ')">'+
+      '<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">'+
+      '<figure class="image is-64x64" style="background-image: "' + room.url + '";"></figure></figure>'+
+      '</div><div class="media-content"><div class="content"><p><strong>' + room.username +'\' game</strong><small>waiting</small><br>'+
+      '<strong>Player 1:</strong> ' + room.username +'<br><strong>Player 2:</strong> ' +  +'</p></div></div><div class="media-right"><br/>'+
+      '<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>');
+    };
     jQuery(document).ready(function ($) {
+
+      $('#loader_content').keypress(function (e) {
+        if (e.which == 13) {
+          $('#loader_content').hide();
+          $('#loader').show();
+        }
+      });
 
       $('.modal-button').click(function () {
         var target = $(this).data('target');
@@ -192,6 +192,7 @@
         $('#loader_content').hide();
         $('#loader').show();
       });
+
     });
   </script>
 </body>

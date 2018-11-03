@@ -42,10 +42,11 @@ io.on('connection', function (socket) {
         } 
     });
 
-    
     socket.on('loggin', function (data) {
         login(data.username, data.password, function(sessionAccount) {
             console.log(sessionAccount.account.username);
+            game.username = sessionAccount.account.username;
+            game.img = sessionAccount.account.profilePicture.url;
             socket.emit('loggin', { sessionId: sessionAccount.sessionId, rooms: getRooms() });
         })
     });
@@ -66,7 +67,6 @@ app.get('/development', function (req, res) {
 app.get('/', function (req, res) {
     var token = req.cookies.acces_token;
     if (token != null) {
-        
         if (game.status == status.EMPTY) {
             game[token] = 1;
             game.status = status.WAITING;
