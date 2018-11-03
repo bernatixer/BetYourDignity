@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Instagram = require('node-instagram').default;
+var cookieParser = require('cookie-parser');
 
 // //Middle ware that is specific to this router
 // router.use(function timeLog(req, res, next) {
@@ -16,7 +17,12 @@ const instagram = new Instagram({
 });
 
 router.get('/', function (req, res) {
-    res.sendFile(__dirname + '/client/start.html');
+    var acces_token = req.cookies.acces_token;
+    if (acces_token != null) {
+        res.render('play', { token: acces_token});
+    } else {
+        res.render('start');
+    }
 });
 
 // Redirect user to instagram oauth
@@ -29,6 +35,7 @@ router.get('/auth/instagram/callback', async (req, res) => {
     try {
         const data = await instagram.authorizeUser(req.query.code, redirectUri);
         // access_token in data.access_token
+        res.cookie("acces_token" , data.access_token, {expire : new Date() + 9999});
         res.json(data);
         console.log(data.access_token);
     } catch (err) {

@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/bernatixer/BetYourDignity#readme",
   "dependencies": {
+    "cookie-parser": "^1.4.3",
     "dotenv": "^6.1.0",
+    "ejs": "^2.6.1",
     "express": "^4.16.4",
     "node-instagram": "^4.2.0",
     "socket.io": "^2.1.1"
