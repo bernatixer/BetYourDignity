@@ -53,7 +53,7 @@
                 <span style="color: #9f73fc">Your</span>
                 <span style="color: #fc7373">Dignity</span>
               </h1>
-              <img id="loader" src="loader.gif" style="display: none;"/>
+              <img id="loader" src="loader.gif" style="display: none;" />
               <div id="loader_content" class="card-content">
                 <div class="content">
                   <form>
@@ -85,7 +85,34 @@
         <p>
           <h1 class="title is-1">Rooms</h1>
         </p>
-        <div id="rooms_list"></div>
+        <div id="rooms_list">
+          <a id="'+key+'" name="join_room" onclick="'+key2+'">
+            <div class="box">
+              <article class="media">
+                <div class="media-left">
+                  <figure class="image is-64x64">
+                    <figure class="image is-64x64" style="background-color: #05cf05;"></figure>
+                  </figure>
+                </div>
+                <div class="media-content">
+                  <div class="content">
+                    <p>
+                      <strong>Sphynx's game</strong>
+                      <small>waiting</small>
+                      <br>Players: </p>
+                  </div>
+                </div>
+                <div class="media-right">
+                  <br/>
+                  <span style="color: black">
+                    <i class="fa fa-play"></i>
+                  </span>
+                </div>
+              </article>
+            </div>
+          </a>
+          <br/>
+        </div>
       </div>
     </div>
 
@@ -125,6 +152,15 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    function getCookie(name) {
+      var value = "; " + document.cookie;
+      var parts = value.split("; " + name + "=");
+      if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+    if (getCookie('sessionId' != null)) {
+      $('#login').hide();
+      $('#rooms').show();
+    }
     var socket = io();
     socket.on('loggin', function (data) {
       $('#loader_content').show();
