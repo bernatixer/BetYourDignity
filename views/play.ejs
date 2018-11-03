@@ -56,10 +56,11 @@
     };
 
     var game = new Phaser.Game(config);
-    var player1, player2, cursor, bullets;
+    var player1, player2, cursor, bullets, group;
     var leftHearts, rightHearts;
     var leftScore, rightScore;
     var curPlayerDirection; 
+    var that;
 
     function preload() {
         this.load.image('A', 'a.png');
@@ -69,10 +70,11 @@
         this.load.image('menu', 'menu.png');
         this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
         this.load.audio('shootAudio', ['sounds/shoot.mp3']);
+        this.load.audio('dieAudio', ['sounds/muerte.mp3']);
     }
 
     function create() {
-
+        that = this;
         var music = this.sound.add('bgAudio');
         music.play();
 
@@ -80,7 +82,7 @@
         cursors = this.input.keyboard.createCursorKeys();
         // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
 
-        var group = this.physics.add.group({
+        group = this.physics.add.group({
             bounceX: false,
             bounceY: false,
             collideWorldBounds: true,
@@ -166,18 +168,17 @@
                 Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
                 this.speed = 0;
                 this.born = 0;
-                console.log(this);
+                //console.log(this);
             },
 
             fire: function (player)
             {
-
+                //console.log(game);
                 this.setPosition(<%= currPlayer %>.x, <%= currPlayer %>.y);
                 if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000 , 1);
                 else this.speed = Phaser.Math.GetSpeed(-1000 , 1);
                 this.body.allowGravity = false;
                 this.born = 0;
-                //physics.add.collider(bullet, group);
             },
 
             update: function (time, delta)
@@ -197,9 +198,11 @@
         bullets = this.physics.add.group({ 
             classType: Bullet, 
             runChildUpdate: true, 
-            collide: false,
+            collide: true,
             collideWorldBounds: true,
         });
+
+        //console.log(this);
 
     }
 
@@ -217,20 +220,25 @@
             <%= currPlayer %>.setVelocityX(200); 
             curPlayerDirection  = true;
         }
+        else <%= currPlayer %>.setVelocityX(0);
+        
         if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
             socket.emit('move', { action: 'vertical', dir: -600});
             <%= currPlayer %>.setVelocityY(-600);
         }
+        
 
         if (cursors.space.isDown && time > this.lastFired)
         {
-            console.log(this);
+            //console.log(this);
             var bullet = bullets.get();
             bullet.setActive(true);
             bullet.setVisible(true);
 
             if (bullet)
             {
+                console.log(this.physics);
+                this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
                 this.sound.add('shootAudio').play();
                 bullet.fire(player1);
                 this.lastFired = time + 300;
@@ -238,13 +246,14 @@
         }
 
         socket.on('move', function (data) {
-            if (data.action == 'horizontal') {
-                if (data.player == 1) player1.setVelocityX(data.dir);
-                else if (data.player == 2) player2.setVelocityX(data.dir);
-            } else if (data.action == 'vertical') {
-                if (data.player == 1) player1.setVelocityY(data.dir);
-                else if (data.player == 2) player2.setVelocityY(data.dir);
+            if (data.action === 'horizontal') {
+                if (data.player === 1) player1.setVelocityX(data.dir);
+                else if (data.player === 2) player2.setVelocityX(data.dir);
+            } else if (data.action === 'vertical') {
+                if (data.player === 1) player1.setVelocityY(data.dir);
+                else if (data.player === 2) player2.setVelocityY(data.dir);
             }
+
             update();
         });
         
@@ -255,5 +264,32 @@
         //     player2.y = locations.player2.y;
         // }
     }
+
+
+    function mycollisionHandler(bullet, group) {
+
+        var actual = <%= currPlayer %>;
+        if (actual === player1) {
+            var vidasRestantes = rightHearts.children.entries.length;
+
+            if (vidasRestantes > 0) {
+                that.sound.add('dieAudio').play();
+                rightHearts.children.entries[0].destroy();
+                --vidasRestantes;
+            }
+
+            if (vidasRestantes === 0) {
+                alert("hey, has ganao pavo, player1");
+            }
+
+        }
+        bullet.destroy();
+    }
+
+    function notCurrentPlayer() {
+        if (<%= currPlayer %> === player1) return player2;
+        else return player1;
+    }
+
 </script>
 </body>
