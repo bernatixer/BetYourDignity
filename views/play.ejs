@@ -163,7 +163,7 @@
             fire: function (player)
             {
 
-                this.setPosition(player.x, player.y);
+                this.setPosition(<%= currPlayer %>.x, <%= currPlayer %>.y);
                 if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000 , 1);
                 else this.speed = Phaser.Math.GetSpeed(-1000 , 1);
                 this.body.allowGravity = false;
