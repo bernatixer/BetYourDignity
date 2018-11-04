@@ -68,9 +68,10 @@
         var leftScore, rightScore;
         var curPlayerDirection1, curPlayerDirection2;
         var that, sprite, platforms, shieldActive;
+        var they, lastMinusLife = 0, cmamo = 0;
 
-        var hostMedia = <%= hostMedia %>;
-        var visitorMedia = <%= visitorMedia %>;
+        //var hostMedia = <%= hostMedia %>;
+        //var visitorMedia = <%= visitorMedia %>;
 
         function preload() {
             that = this;
@@ -79,8 +80,8 @@
             this.load.image('heart', 'corazon.png');
             this.load.image('back', 'back.png');
             this.load.image('menu', 'menu.png');
-            this.load.image('hostMedia', hostMedia[0].image.url);
-            this.load.image('visitorMedia', visitorMedia[0].image.url);
+            //this.load.image('hostMedia', hostMedia[0].image.url);
+            //this.load.image('visitorMedia', visitorMedia[0].image.url);
             this.load.image('platform', 'platform.png');
             this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
             this.load.audio('shootAudio', ['sounds/shoot.mp3']);
@@ -213,8 +214,7 @@
                     this.born += delta;
 
                     if (this.born > 1000) {
-                        this.setActive(false);
-                        this.setVisible(false);
+                        this.destroy();
                     }
                 }
 
@@ -244,6 +244,9 @@
         }
 
         function update(time) {
+
+            they = this; 
+
             sprite.setPosition(<%= currPlayer %>.getCenter().x, <%= currPlayer %>.getCenter().y - 30);
 
             if (cursors.left.isDown) {
@@ -287,7 +290,11 @@
 
                 if (bullet) {
                     if (emit) socket.emit('fire');
-                    dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
+                    if (emit) dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
+                    else {
+                        cmamo = time;
+                        dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler2);
+                    }
                     dis.physics.add.collider(bullet, platforms, handlerDestroyer);
                     dis.sound.add('shootAudio').play();
                     bullet.fire(player);
@@ -296,7 +303,7 @@
             }
 
             function middleWare(player) {
-                playerFire(player, this, false);
+                playerFire(player, they, false);
             }
 
             socket.on('fire', function () {
@@ -329,32 +336,58 @@
             var actual = <%= currPlayer %>;
             if (actual === player1) {
                 var vidasRestantes = rightHearts.children.entries.length;
-
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
                     rightHearts.children.entries[0].destroy();
                     --vidasRestantes;
                 }
-
                 if (vidasRestantes === 0) {
                     alert("hey, has ganao pavo, player1");
                 }
-
             } else if (actual === player2) {
                 var vidasRestantes = leftHearts.children.entries.length;
-
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
                     leftHearts.children.entries[vidasRestantes - 1].destroy();
                     --vidasRestantes;
                 }
-
                 if (vidasRestantes === 0) {
                     alert("hey, has ganao pavo, player2");
                 }
-
             }
+
             bullet.destroy();
+        
+        }
+
+        function mycollisionHandler2(bullet, group) {
+            console.log(cmamo);
+            if (cmamo > lastMinusLife) {           
+                var actual = notCurrentPlayer();
+                if (actual === player1) {
+                    var vidasRestantes = rightHearts.children.entries.length;
+                    if (vidasRestantes > 0) {
+                        that.sound.add('dieAudio').play();
+                        rightHearts.children.entries[0].destroy();
+                        --vidasRestantes;
+                    }
+                    if (vidasRestantes === 0) {
+                        alert("hey, has ganao pavo, player1");
+                    }
+                } else if (actual === player2) {
+                    var vidasRestantes = leftHearts.children.entries.length;
+                    if (vidasRestantes > 0) {
+                        that.sound.add('dieAudio').play();
+                        leftHearts.children.entries[vidasRestantes - 1].destroy();
+                        --vidasRestantes;
+                    }
+                    if (vidasRestantes === 0) {
+                        alert("hey, has ganao pavo, player2");
+                    }
+                }
+                lastMinusLife = cmamo + 400;
+                console.log('caca');
+            }
         }
 
         function notCurrentPlayer() {
