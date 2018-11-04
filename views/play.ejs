@@ -65,13 +65,13 @@
         var player1, player2, cursor, bullets, group;
         var leftHearts, rightHearts;
         var leftScore, rightScore;
-        var curPlayerDirection;
+        var curPlayerDirection1, curPlayerDirection2;
         var that, sprite, platforms, shieldActive;
 
         function preload() {
             that = this;
-            this.load.image('A', '/assets/<%= hostBiene %>.png');
-            this.load.image('B', '/assets/<%= visitorBiene %>.png');
+            this.load.image('A', '/assetsMini/<%= hostBiene %>.png');
+            this.load.image('B', '/assetsMini/<%= visitorBiene %>.png');
             this.load.image('heart', 'corazon.png');
             this.load.image('back', 'back.png');
             this.load.image('menu', 'menu.png');
@@ -195,8 +195,9 @@
 
                 fire: function (player) {
                     //console.log(game);
-                    this.setPosition(<%= currPlayer %>.x, <%= currPlayer %>.y);
-                    if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000, 1);
+                    this.setPosition(player.x, player.y);
+                    if (player === player1 && curPlayerDirection1) this.speed = Phaser.Math.GetSpeed(1000, 1);
+                    else if (player === player2 && curPlayerDirection2) this.speed = Phaser.Math.GetSpeed(1000, 1);
                     else this.speed = Phaser.Math.GetSpeed(-1000, 1);
                     this.body.allowGravity = false;
                     this.born = 0;
@@ -247,21 +248,24 @@
 
             if (cursors.left.isDown) {
                 socket.emit('move', { action: 'horizontal', dir: -200 });
-            <%= currPlayer %>.setVelocityX(-200);
-                curPlayerDirection = false;
+                <%= currPlayer %>.setVelocityX(-200);
+                if (<%= currPlayer %> === player1) curPlayerDirection1 = false;
+                if (<%= currPlayer %> === player2) curPlayerDirection2 = false;
             }
             else if (cursors.right.isDown) {
                 socket.emit('move', { action: 'horizontal', dir: 200 });
-            <%= currPlayer %>.setVelocityX(200);
-                curPlayerDirection = true;
+                <%= currPlayer %>.setVelocityX(200);
+                if (<%= currPlayer %> === player1) curPlayerDirection1 = true;
+                if (<%= currPlayer %> === player2) curPlayerDirection2 = true;
             }
             else <%= currPlayer %>.setVelocityX(0);
 
-            if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
+            if (cursors.up.isDown && (<%= currPlayer %>.body.onFloor() || <%= currPlayer %>.body.touching.down)) {
                 socket.emit('move', { action: 'vertical', dir: -600 });
-            <%= currPlayer %>.setVelocityY(-600);
+                <%= currPlayer %>.setVelocityY(-600);
             }
 
+            // Activar/Desactivar escut (shieldActive <- IMPORTANT)
             if (shieldButton.isDown) {
                 shieldActive = true;
                 if (!sprite.anims.isPlaying) {
@@ -272,31 +276,43 @@
             else shieldActive = false;
 
             if (cursors.space.isDown && time > this.lastFired) {
-                //console.log(this);
+                playerFire(<%= currPlayer %>, this, true);
+            }
+            
+            function playerFire(player, dis, emit) {
                 var bullet = bullets.get();
                 bullet.setActive(true);
                 bullet.setVisible(true);
 
                 if (bullet) {
-                    console.log(this.physics);
-                    this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
-                    this.physics.add.collider(bullet, platforms, handlerDestroyer);
-                    this.sound.add('shootAudio').play();
-                    bullet.fire(player1);
-                    this.lastFired = time + 300;
+                    if (emit) socket.emit('fire');
+                    dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
+                    dis.physics.add.collider(bullet, platforms, handlerDestroyer);
+                    dis.sound.add('shootAudio').play();
+                    bullet.fire(player);
+                    dis.lastFired = time + 300;
                 }
             }
 
+            socket.on('fire', function () {
+                playerFire(notCurrentPlayer, this, false);
+            })
+
             socket.on('move', function (data) {
                 if (data.action === 'horizontal') {
-                    if (data.player === 1) player1.setVelocityX(data.dir);
-                    else if (data.player === 2) player2.setVelocityX(data.dir);
+                    if (data.player === 1) {
+                        <%= currPlayer %>.setVelocityX(data.dir);
+                        curPlayerDirection1 = data.dir >= 0;
+                    } else if (data.player === 2) {
+                        player2.setVelocityX(data.dir);
+                        curPlayerDirection2 = data.dir >= 0;
+                    }
                 } else if (data.action === 'vertical') {
-                    if (data.player === 1) player1.setVelocityY(data.dir);
+                    if (data.player === 1) <%= currPlayer %>.setVelocityY(data.dir);
                     else if (data.player === 2) player2.setVelocityY(data.dir);
                 }
 
-                update();
+                // update();
             });
 
         }
@@ -321,13 +337,26 @@
                     alert("hey, has ganao pavo, player1");
                 }
 
+            } else if (actual === player2) {
+                var vidasRestantes = leftHearts.children.entries.length;
+
+                if (vidasRestantes > 0) {
+                    that.sound.add('dieAudio').play();
+                    leftHearts.children.entries[vidasRestantes-1].destroy();
+                    --vidasRestantes;
+                }
+
+                if (vidasRestantes === 0) {
+                    alert("hey, has ganao pavo, player2");
+                }
+
             }
             bullet.destroy();
         }
 
         function notCurrentPlayer() {
             if (<%= currPlayer %> === player1) return player2;
-        else return player1;
+            else return player1;
         }
 
         function resize() {

@@ -49,6 +49,10 @@ io.on('connection', function (socket) {
         }
     });
 
+    socket.on('fire', function () {
+        socket.broadcast.emit('fire');
+    }) 
+
     socket.on('loggin', function (data) {
         login(data.username, data.password, function (sessionAccount) {
             sessionInfo = sessionAccount;
@@ -94,7 +98,7 @@ io.on('connection', function (socket) {
 });
 
 app.get('/development', function (req, res) {
-    res.render('play', { currPlayer: "player1" });
+    res.render('play', { currPlayer: "player1", hostBiene: 'andreu', visitorBiene: 'bernat', hostName: 'andreu', visitorName: 'bernat' });
 });
 
 app.get('/play', function (req, res) {
