@@ -51,7 +51,8 @@ io.on('connection', function (socket) {
     });
 
     socket.on('fire', function () {
-        socket.broadcast.emit('fire');
+        console.log('serversito');
+        socket.broadcast.emit('sendBullet');
     })
 
     socket.on('loggin', function (data) {

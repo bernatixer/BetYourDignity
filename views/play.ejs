@@ -68,7 +68,7 @@
         var leftScore, rightScore;
         var curPlayerDirection1, curPlayerDirection2;
         var that, sprite, platforms, shieldActive;
-        var they, lastMinusLife = 0, cmamo = 0;
+        var they, lastMinusLife = 0, cmamo = 0, emit2;
 
         //var hostMedia = <%= hostMedia %>;
         //var visitorMedia = <%= visitorMedia %>;
@@ -200,6 +200,7 @@
                     },
 
                 fire: function (player) {
+                    console.log('test' + player);
                     this.setPosition(player.x, player.y);
                     this.setScale(0.25, 0.25);
                     if (player === player1 && curPlayerDirection1) this.speed = Phaser.Math.GetSpeed(1000, 1);
@@ -213,8 +214,9 @@
                     this.x += this.speed * delta;
                     this.born += delta;
 
-                    if (this.born > 1000) {
-                        this.destroy();
+                    if (typeof this != 'undefined' && this.born > 1000) {
+                        this.setActive(true);
+                        this.setVisible(true);
                     }
                 }
 
@@ -269,6 +271,22 @@
                 <%= currPlayer %>.setVelocityY(-600);
             }
 
+            socket.on('move', function (data) {
+                if (data.action === 'horizontal') {
+                    if (data.player == 1) {
+                        player1.setVelocityX(data.dir);
+                        curPlayerDirection1 = data.dir >= 0;
+                    } else if (data.player == 2) {
+                        player2.setVelocityX(data.dir);
+                        curPlayerDirection2 = data.dir >= 0;
+                    }
+                } else if (data.action === 'vertical') {
+                    if (data.player == 1) player1.setVelocityY(data.dir);
+                    else if (data.player == 2) player2.setVelocityY(data.dir);
+                }
+            });
+    
+
             // Activar/Desactivar escut (shieldActive <- IMPORTANT)
             if (shieldButton.isDown) {
                 shieldActive = true;
@@ -292,9 +310,12 @@
                     if (emit) socket.emit('fire');
                     if (emit) dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
                     else {
+                        console.log(time + " " + lastMinusLife);
                         cmamo = time;
-                        dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler2);
+                        if (time > lastMinusLife) dis.physics.add.collider(bullet, notCurrentPlayer() , mycollisionHandler2);
+                        //lastMinusLife = time + 500;
                     }
+                    
                     dis.physics.add.collider(bullet, platforms, handlerDestroyer);
                     dis.sound.add('shootAudio').play();
                     bullet.fire(player);
@@ -302,38 +323,37 @@
                 }
             }
 
-            function middleWare(player) {
-                playerFire(player, they, false);
-            }
-
-            socket.on('fire', function () {
-                middleWare(notCurrentPlayer());
-            })
-
-            socket.on('move', function (data) {
-                if (data.action === 'horizontal') {
-                    if (data.player == 1) {
-                        player1.setVelocityX(data.dir);
-                        curPlayerDirection1 = data.dir >= 0;
-                    } else if (data.player == 2) {
-                        player2.setVelocityX(data.dir);
-                        curPlayerDirection2 = data.dir >= 0;
-                    }
-                } else if (data.action === 'vertical') {
-                    if (data.player == 1) player1.setVelocityY(data.dir);
-                    else if (data.player == 2) player2.setVelocityY(data.dir);
-                }
-            });
-
         }
+
+
+        socket.on('sendBullet', function () {
+            console.log('lmao');
+            SocketplayerFire(notCurrentPlayer(), they);
+        })
+
+        function SocketplayerFire(player, dis) {
+            console.log('caca');
+            var bullet = bullets.get();
+            bullet.setActive(true);
+            bullet.setVisible(true);
+
+            if (bullet) {
+                dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler2);
+                dis.physics.add.collider(bullet, platforms, handlerDestroyer);
+                dis.sound.add('shootAudio').play();
+                bullet.fire(player);
+                dis.lastFired = time + 300;
+            }
+        }
+
 
         function handlerDestroyer(a, b) {
             a.destroy();
         }
 
         function mycollisionHandler(bullet, group) {
-
             var actual = <%= currPlayer %>;
+
             if (actual === player1) {
                 var vidasRestantes = rightHearts.children.entries.length;
                 if (vidasRestantes > 0) {
@@ -357,37 +377,34 @@
             }
 
             bullet.destroy();
-        
         }
 
         function mycollisionHandler2(bullet, group) {
-            console.log(cmamo);
-            if (cmamo > lastMinusLife) {           
-                var actual = notCurrentPlayer();
-                if (actual === player1) {
-                    var vidasRestantes = rightHearts.children.entries.length;
-                    if (vidasRestantes > 0) {
-                        that.sound.add('dieAudio').play();
-                        rightHearts.children.entries[0].destroy();
-                        --vidasRestantes;
-                    }
-                    if (vidasRestantes === 0) {
-                        alert("hey, has ganao pavo, player1");
-                    }
-                } else if (actual === player2) {
-                    var vidasRestantes = leftHearts.children.entries.length;
-                    if (vidasRestantes > 0) {
-                        that.sound.add('dieAudio').play();
-                        leftHearts.children.entries[vidasRestantes - 1].destroy();
-                        --vidasRestantes;
-                    }
-                    if (vidasRestantes === 0) {
-                        alert("hey, has ganao pavo, player2");
-                    }
+            var actual = notCurrentPlayer();
+
+            if (actual === player1) {
+                var vidasRestantes = rightHearts.children.entries.length;
+                if (vidasRestantes > 0) {
+                    that.sound.add('dieAudio').play();
+                    rightHearts.children.entries[0].destroy();
+                    --vidasRestantes;
                 }
-                lastMinusLife = cmamo + 400;
-                console.log('caca');
+                if (vidasRestantes === 0) {
+                    alert("hey, has ganao pavo, player1");
+                }
+            } else if (actual === player2) {
+                var vidasRestantes = leftHearts.children.entries.length;
+                if (vidasRestantes > 0) {
+                    that.sound.add('dieAudio').play();
+                    leftHearts.children.entries[vidasRestantes - 1].destroy();
+                    --vidasRestantes;
+                }
+                if (vidasRestantes === 0) {
+                    alert("hey, has ganao pavo, player2");
+                }
             }
+
+            bullet.destroy();
         }
 
         function notCurrentPlayer() {
