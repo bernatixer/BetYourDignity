@@ -79,8 +79,12 @@
             this.load.image('A', '/assetsMini/<%= hostBiene %>.png');
             this.load.image('B', '/assetsMini/<%= visitorBiene %>.png');
             this.load.image('heart', 'corazon.png');
-            this.load.image('back', 'back.png');
+            if (Math.random() < 0.5)
+                this.load.image('back', 'back.png');
+            else
+                this.load.image('back', 'back2.png');
             this.load.image('menu', 'menu.png');
+            this.load.image('terra', 'suelo.png');
             this.load.image('hostMedia0', hostMedia[0].image.url);
             this.load.image('hostMedia1', hostMedia[1].image.url);
             this.load.image('hostMedia2', hostMedia[2].image.url);
@@ -91,7 +95,10 @@
             this.load.image('visitorMedia2', visitorMedia[2].image.url);
             this.load.image('visitorMedia3', visitorMedia[3].image.url);
             this.load.image('visitorMedia4', visitorMedia[4].image.url);
-            this.load.image('platform', 'platform.png');
+            if (Math.random() < 0.5)
+                this.load.image('platform', 'platform.png');
+            else
+                this.load.image('platform', 'platform2.png');
             this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
             this.load.audio('shootAudio', ['sounds/shoot.mp3']);
             this.load.audio('dieAudio', ['sounds/muerte.mp3']);
@@ -127,20 +134,20 @@
                 collide: true,
             });
 
-            var fondo = this.add.tileSprite(600, 400, 0, 0, 'back').setScale(0.8);
+            var fondo = this.add.tileSprite(400, 300, 0, 0, 'back').setOrigin(0.5,0.5).setScale(0.8);
             fondo.alpha = 0.25;
 
             var menu = this.add.tileSprite(400, 60, 0, 0, 'menu');
 
 
             player1 = group.create(200, 200, "A").setScale(0.45);
-            player2 = group.create(600, 550, "B").setScale(0.45);
+            player2 = group.create(600, 520, "B").setScale(0.45);
 
             // player1.body.setSize(50, 80, 25, 30);
             // player2.body.setSize(50, 80, 25, 30);
 
             // player1.body.immovable = true;
-            player2.body.immovable = true;
+            // player2.body.immovable = true;
 
 
             this.physics.add.collider(group, group);
@@ -246,6 +253,8 @@
         platforms.create(400, 500 - 35, 'platform').setOrigin(0.5, 1);
         platforms.create(600, 300 + 15, 'platform').setOrigin(0.5, 1);
         platforms.create(200, 300 + 15, 'platform').setOrigin(0.5, 1);
+
+        platforms.create(400, 600, "terra").setOrigin(0.5, 1);
 
         platforms.add(menu);
 
