@@ -3,7 +3,7 @@ var app = express();
 var cookieParser = require('cookie-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var { login, getCurrentSessionAccount } = require('./instagram-scraper');
+var { login, getCurrentSessionAccount, getAccountMedia, like, getFollowers, follow } = require('./instagram-scraper');
 require('dotenv').config();
 
 app.set('view engine', 'ejs');
@@ -52,7 +52,7 @@ io.on('connection', function (socket) {
 
     socket.on('fire', function () {
         socket.broadcast.emit('fire');
-    }) 
+    })
 
     socket.on('loggin', function (data) {
         login(data.username, data.password, function (sessionAccount) {
@@ -69,6 +69,7 @@ io.on('connection', function (socket) {
         game[sessionInfo.sessionId] = 1;
         game.visitor = "";
         game.playerNum = 1;
+        game.sessionId1 = sessionInfo.sessionId;
         playerNum = 1;
         playing = true;
         socket.emit('setPlayerNum', playerNum);
@@ -81,6 +82,7 @@ io.on('connection', function (socket) {
             game[sessionInfo.sessionId] = 2;
             game.visitor = sessionInfo.account.username;
             game.playerNum = 2;
+            game.sessionId2 = sessionInfo.sessionId;
             playerNum = 2;
             playing = true;
             socket.emit('setPlayerNum', playerNum);
@@ -99,14 +101,20 @@ io.on('connection', function (socket) {
 });
 
 app.get('/development', function (req, res) {
-    res.render('play', { currPlayer: "player1", hostBiene: 'andreu', visitorBiene: 'bernat', hostName: 'andreu', visitorName: 'bernat' });
+    res.render('play', { currPlayer: "player1", hostBiene: 'andreu', visitorBiene: 'bernat', hostName: 'andreu', visitorName: 'bernat', hostMedia: 'https://scontent-frx5-1.cdninstagram.com/vp/888c05e40d49f6db2e5a7c7786358a22/5C6E29A4/t51.2885-15/e35/s240x240/43914840_259986014707285_7552744139318422425_n.jpg?ig_cache_key=MTkwNDc5NDQzNjkzNDQ4MjU1Mg%3D%3D.2', visitorMedia: 'https://scontent-frx5-1.cdninstagram.com/vp/888c05e40d49f6db2e5a7c7786358a22/5C6E29A4/t51.2885-15/e35/s240x240/43914840_259986014707285_7552744139318422425_n.jpg?ig_cache_key=MTkwNDc5NDQzNjkzNDQ4MjU1Mg%3D%3D.2' });
 });
 
 app.get('/play', function (req, res) {
     var playerNum = req.cookies.playerNum;
     if (playerNum != null) {
-        if (playerNum == 1) res.render('play', { currPlayer: "player1", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor });
-        else if (playerNum == 2) res.render('play', { currPlayer: "player2", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor });
+        getAccountMedia(game.sessionId1, function (hostMedia) {
+            getAccountMedia(game.sessionId2, function (visitorMedia) {
+                hostMedia = hostMedia[0].image.url;
+                visitorMedia = visitorMedia[0].image.url;
+                if (playerNum == 1) res.render('play', { currPlayer: "player1", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor, hostMedia: hostMedia, visitorMedia: visitorMedia });
+                else if (playerNum == 2) res.render('play', { currPlayer: "player2", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor, hostMedia: hostMedia, visitorMedia: visitorMedia });
+            });
+        });
     } else res.redirect('/');
 });
 

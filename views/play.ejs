@@ -75,6 +75,8 @@
             this.load.image('heart', 'corazon.png');
             this.load.image('back', 'back.png');
             this.load.image('menu', 'menu.png');
+            this.load.image('hostMedia', '<%= hostMedia %>');
+            this.load.image('visitorMedia', '<%= visitorMedia %>');
             this.load.image('platform', 'platform.png');
             this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
             this.load.audio('shootAudio', ['sounds/shoot.mp3']);
@@ -187,14 +189,12 @@
                 initialize:
 
                     function Bullet(scene) {
-                        Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+                        Phaser.GameObjects.Image.call(this, scene, 0, 0, 'hostMedia');
                         this.speed = 0;
                         this.born = 0;
-                        //console.log(this);
                     },
 
                 fire: function (player) {
-                    //console.log(game);
                     this.setPosition(player.x, player.y);
                     if (player === player1 && curPlayerDirection1) this.speed = Phaser.Math.GetSpeed(1000, 1);
                     else if (player === player2 && curPlayerDirection2) this.speed = Phaser.Math.GetSpeed(1000, 1);
@@ -221,8 +221,6 @@
                 collide: true,
                 collideWorldBounds: true,
             });
-
-            //console.log(this);
 
             platforms = this.physics.add.group({
                 allowGravity: false,
