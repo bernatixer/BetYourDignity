@@ -125,6 +125,12 @@ app.get('/play', function (req, res) {
 app.get('/', function (req, res) {
     res.render('start');
 });
+app.get('/winner', function (req, res) {
+    res.render('winner');
+});
+app.get('/loser', function (req, res) {
+    res.render('loser');
+});
 
 http.listen(process.env.PORT, function () {
     console.log('BetYourDignity running on port ' + process.env.PORT);

@@ -396,7 +396,7 @@
                     --vidasRestantes;
                 }
                 if (vidasRestantes === 0) {
-                    alert("hey, has ganao pavo, player1");
+                    window.location.href = location.origin + '/winner';
                 }
             } else if (actual === player2) {
                 socket.emit('hit', visitorMedia[ind].id);
@@ -407,7 +407,7 @@
                     --vidasRestantes;
                 }
                 if (vidasRestantes === 0) {
-                    alert("hey, has ganao pavo, player2");
+                    window.location.href = location.origin + '/winner';
                 }
             }
 
@@ -427,7 +427,7 @@
                     --vidasRestantes;
                 }
                 if (vidasRestantes === 0) {
-                    alert("hey, has ganao pavo, player1");
+                    window.location.href = location.origin + '/loser';
                 }
             } else if (actual === player2) {
                 //socket.emit('hit', visitorMedia[ind].id);
@@ -438,7 +438,7 @@
                     --vidasRestantes;
                 }
                 if (vidasRestantes === 0) {
-                    alert("hey, has ganao pavo, player2");
+                    window.location.href = location.origin + '/loser';
                 }
             }
 
