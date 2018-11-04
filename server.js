@@ -98,6 +98,10 @@ io.on('connection', function (socket) {
         if (hostBiene != null && visitorBiene != null) io.emit('startGame');
     });
 
+    socket.on('hit', function(mediaId) {
+        like(sessionInfo.sessionId, mediaId);
+    });
+
 });
 
 app.get('/development', function (req, res) {
