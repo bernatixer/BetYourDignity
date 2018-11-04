@@ -23,335 +23,329 @@
 </head>
 
 <body>
-<div id="phaser-example"></div>
+    <div id="phaser-example"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    window.onload = function() {
-        window.focus()
-        resize();
-        window.addEventListener("resize", resize, false);
-    }
-
-    var socket = io();
-    var config = {
-        type: Phaser.AUTO,
-        width: 800,
-        height: 600,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                // debug: true,
-                gravity: {y: 600}
-            },
-        },
-        audio: {
-            // disableWebAudio: true
-        },
-        backgroundColor: '#2d2d2d',
-        scene: {
-            preload: preload,
-            create: create,
-            update: update,
-            extend: {
-                bullets: null,
-                lastFired: 0
-            }
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        window.onload = function () {
+            window.focus()
+            resize();
+            window.addEventListener("resize", resize, false);
         }
-    };
 
-    var game = new Phaser.Game(config);
-    var player1, player2, cursor, bullets, group;
-    var leftHearts, rightHearts;
-    var leftScore, rightScore;
-    var curPlayerDirection; 
-    var that, sprite, platforms, shieldActive;
-
-    function preload() {
-        that = this;
-        this.load.image('A', 'a.png');
-        this.load.image('B', 'b.png');
-        this.load.image('heart', 'corazon.png');
-        this.load.image('back', 'back.png');
-        this.load.image('menu', 'menu.png');
-        this.load.image('platform', 'platform.png');
-        this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
-        this.load.audio('shootAudio', ['sounds/shoot.mp3']);
-        this.load.audio('dieAudio', ['sounds/muerte.mp3']);
-        this.load.spritesheet('heal', 'healAnimation.png', { frameWidth: 192, frameHeight: 192 });
-    }
-
-    function create() {
-
+        var socket = io();
         var config = {
-            key: 'heal',
-            frames: this.anims.generateFrameNumbers('heal'),
-            frameRate: 60,
-            repeat: 0
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    // debug: true,
+                    gravity: { y: 600 }
+                },
+            },
+            audio: {
+                // disableWebAudio: true
+            },
+            backgroundColor: '#2d2d2d',
+            scene: {
+                preload: preload,
+                create: create,
+                update: update,
+                extend: {
+                    bullets: null,
+                    lastFired: 0
+                }
+            }
         };
 
-        sprite = this.add.sprite(-200, -200, 'heal').setScale(0.8, 1);
-        sprite.frame = 20;
-        var anim = this.anims.create(config);
+        var game = new Phaser.Game(config);
+        var player1, player2, cursor, bullets, group;
+        var leftHearts, rightHearts;
+        var leftScore, rightScore;
+        var curPlayerDirection;
+        var that, sprite, platforms, shieldActive;
 
-        that = this;
-        this.sound.add('bgAudio').play({
-            loop: true
-        });
+        function preload() {
+            that = this;
+            this.load.image('A', '/assets/<%= hostBiene %>.png');
+            this.load.image('B', '/assets/<%= visitorBiene %>.png');
+            this.load.image('heart', 'corazon.png');
+            this.load.image('back', 'back.png');
+            this.load.image('menu', 'menu.png');
+            this.load.image('platform', 'platform.png');
+            this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
+            this.load.audio('shootAudio', ['sounds/shoot.mp3']);
+            this.load.audio('dieAudio', ['sounds/muerte.mp3']);
+            this.load.spritesheet('heal', 'healAnimation.png', { frameWidth: 192, frameHeight: 192 });
+        }
 
-        // Create players
-        cursors = this.input.keyboard.createCursorKeys();
-        // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        function create() {
 
-        group = this.physics.add.group({
-            bounceX: true,
-            bounceY: false,
-            collideWorldBounds: true,
-            collide: true,
-        });
+            var config = {
+                key: 'heal',
+                frames: this.anims.generateFrameNumbers('heal'),
+                frameRate: 60,
+                repeat: 0
+            };
 
-        var fondo = this.add.tileSprite(600, 400, 0, 0, 'back').setScale(0.8);
-        fondo.alpha = 0.25;
+            sprite = this.add.sprite(-200, -200, 'heal').setScale(0.8, 1);
+            sprite.frame = 20;
+            var anim = this.anims.create(config);
 
-        var menu = this.add.tileSprite(400, 60, 0, 0, 'menu');
+            that = this;
+            this.sound.add('bgAudio').play({
+                loop: true
+            });
+
+            // Create players
+            cursors = this.input.keyboard.createCursorKeys();
+            // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+
+            group = this.physics.add.group({
+                bounceX: true,
+                bounceY: false,
+                collideWorldBounds: true,
+                collide: true,
+            });
+
+            var fondo = this.add.tileSprite(600, 400, 0, 0, 'back').setScale(0.8);
+            fondo.alpha = 0.25;
+
+            var menu = this.add.tileSprite(400, 60, 0, 0, 'menu');
 
 
-        player1 = group.create(200, 200, "A");
-        player2 = group.create(600, 550, "B");
+            player1 = group.create(200, 200, "A");
+            player2 = group.create(600, 550, "B");
 
-        player1.body.setSize(50, 80, 25, 30);
-        player2.body.setSize(50, 80, 25, 30);
+            player1.body.setSize(50, 80, 25, 30);
+            player2.body.setSize(50, 80, 25, 30);
 
-        // player1.body.immovable = true;
-        player2.body.immovable = true;
+            // player1.body.immovable = true;
+            player2.body.immovable = true;
 
 
-        this.physics.add.collider(group, group);
+            this.physics.add.collider(group, group);
 
-        // Create hearts
-        leftHearts = this.add.group({
-            key: 'heart',
-            frameQuantity: 5,
-            setScale: {
-                x: 2,
-                y: 2
-            },
-            setXY: {
-                x: 45,
-                y: 65,
-                stepX: 40
+            // Create hearts
+            leftHearts = this.add.group({
+                key: 'heart',
+                frameQuantity: 5,
+                setScale: {
+                    x: 2,
+                    y: 2
+                },
+                setXY: {
+                    x: 45,
+                    y: 65,
+                    stepX: 40
+                }
+            });
+
+            rightHearts = this.add.group({
+                key: 'heart',
+                frameQuantity: 5,
+                setScale: {
+                    x: 2,
+                    y: 2
+                },
+                setXY: {
+                    x: 600,
+                    y: 65,
+                    stepX: 40
+                }
+            });
+
+            // Textos
+            leftScore = this.add.text(30, 25, '<%= hostName %>', {
+                fontSize: '32px',
+                fill: '#FFF',
+                fontFamily: "Segoe UI, Arial",
+                shadowColor: "#111",
+            });
+            leftScore.setShadow(2, 2, 'rgba(0,0,0,0.5)', 5);
+            leftScore.setOrigin(0, 0.5);
+
+            rightScore = this.add.text(800 - 30, 25, '<%= visitorName %>', {
+                fontSize: '32px',
+                fill: '#FFF',
+                fontFamily: "Segoe UI, Arial",
+                shadowColor: "#111",
+                textAlign: "right"
+            });
+            rightScore.setShadow(2, 2, 'rgba(0,0,0,0.5)', 5);
+            rightScore.setOrigin(1, 0.5);
+
+            /* Bullets */
+
+            var Bullet = new Phaser.Class({
+
+                Extends: Phaser.GameObjects.Image,
+
+                initialize:
+
+                    function Bullet(scene) {
+                        Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+                        this.speed = 0;
+                        this.born = 0;
+                        //console.log(this);
+                    },
+
+                fire: function (player) {
+                    //console.log(game);
+                    this.setPosition(<%= currPlayer %>.x, <%= currPlayer %>.y);
+                    if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000, 1);
+                    else this.speed = Phaser.Math.GetSpeed(-1000, 1);
+                    this.body.allowGravity = false;
+                    this.born = 0;
+                },
+
+                update: function (time, delta) {
+                    this.x += this.speed * delta;
+                    this.born += delta;
+
+                    if (this.born > 1000) {
+                        this.setActive(false);
+                        this.setVisible(false);
+                    }
+                }
+
+            });
+
+            bullets = this.physics.add.group({
+                classType: Bullet,
+                runChildUpdate: true,
+                collide: true,
+                collideWorldBounds: true,
+            });
+
+            //console.log(this);
+
+            platforms = this.physics.add.group({
+                allowGravity: false,
+                immovable: true
+            });
+            platforms.create(400, 500 - 35, 'platform').setOrigin(0.5, 1);
+            platforms.create(600, 300 + 15, 'platform').setOrigin(0.5, 1);
+            platforms.create(200, 300 + 15, 'platform').setOrigin(0.5, 1);
+
+            platforms.add(menu);
+
+            this.physics.add.collider(group, platforms);
+
+            shieldButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+
+        }
+
+        function update(time) {
+            // socket.emit('currPosition', { x: <%= currPlayer %>.x, y: <%= currPlayer %>.y });
+            // player1.setVelocity(0);
+
+            sprite.setPosition(<%= currPlayer %>.getCenter().x, <%= currPlayer %>.getCenter().y - 30);
+
+            if (cursors.left.isDown) {
+                socket.emit('move', { action: 'horizontal', dir: -200 });
+            <%= currPlayer %>.setVelocityX(-200);
+                curPlayerDirection = false;
             }
-        });
-
-        rightHearts = this.add.group({
-            key: 'heart',
-            frameQuantity: 5,
-            setScale: {
-                x: 2,
-                y: 2
-            },
-            setXY: {
-                x: 600,
-                y: 65,
-                stepX: 40
+            else if (cursors.right.isDown) {
+                socket.emit('move', { action: 'horizontal', dir: 200 });
+            <%= currPlayer %>.setVelocityX(200);
+                curPlayerDirection = true;
             }
-        });
+            else <%= currPlayer %>.setVelocityX(0);
 
-        // Textos
-        leftScore = this.add.text(30, 25, 'Player 1 name equisde', {
-            fontSize: '32px',
-            fill: '#FFF',
-            fontFamily: "Segoe UI, Arial",
-            shadowColor: "#111",
-        });
-        leftScore.setShadow(2, 2, 'rgba(0,0,0,0.5)', 5);
-        leftScore.setOrigin(0, 0.5);
+            if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
+                socket.emit('move', { action: 'vertical', dir: -600 });
+            <%= currPlayer %>.setVelocityY(-600);
+            }
 
-        rightScore = this.add.text(800 - 30, 25, 'Player 2 name', {
-            fontSize: '32px',
-            fill: '#FFF',
-            fontFamily: "Segoe UI, Arial",
-            shadowColor: "#111",
-            textAlign: "right"
-        });
-        rightScore.setShadow(2, 2, 'rgba(0,0,0,0.5)', 5);
-        rightScore.setOrigin(1, 0.5);
+            if (shieldButton.isDown) {
+                shieldActive = true;
+                if (!sprite.anims.isPlaying) {
+                    sprite.anims.load('heal');
+                    sprite.anims.play('heal');
+                }
+            }
+            else shieldActive = false;
 
-                /* Bullets */
-
-        var Bullet = new Phaser.Class({
-
-            Extends: Phaser.GameObjects.Image,
-
-            initialize:
-
-            function Bullet (scene)
-            {
-                Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
-                this.speed = 0;
-                this.born = 0;
+            if (cursors.space.isDown && time > this.lastFired) {
                 //console.log(this);
-            },
+                var bullet = bullets.get();
+                bullet.setActive(true);
+                bullet.setVisible(true);
 
-            fire: function (player)
-            {
-                //console.log(game);
-                this.setPosition(<%= currPlayer %>.x, <%= currPlayer %>.y);
-                if (curPlayerDirection) this.speed = Phaser.Math.GetSpeed(1000 , 1);
-                else this.speed = Phaser.Math.GetSpeed(-1000 , 1);
-                this.body.allowGravity = false;
-                this.born = 0;
-            },
-
-            update: function (time, delta)
-            {
-                this.x += this.speed * delta;
-                this.born += delta;
-
-                if (this.born > 1000)
-                {
-                    this.setActive(false);
-                    this.setVisible(false);
+                if (bullet) {
+                    console.log(this.physics);
+                    this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
+                    this.physics.add.collider(bullet, platforms, handlerDestroyer);
+                    this.sound.add('shootAudio').play();
+                    bullet.fire(player1);
+                    this.lastFired = time + 300;
                 }
             }
 
-        });
+            socket.on('move', function (data) {
+                if (data.action === 'horizontal') {
+                    if (data.player === 1) player1.setVelocityX(data.dir);
+                    else if (data.player === 2) player2.setVelocityX(data.dir);
+                } else if (data.action === 'vertical') {
+                    if (data.player === 1) player1.setVelocityY(data.dir);
+                    else if (data.player === 2) player2.setVelocityY(data.dir);
+                }
 
-        bullets = this.physics.add.group({ 
-            classType: Bullet, 
-            runChildUpdate: true, 
-            collide: true,
-            collideWorldBounds: true,
-        });
+                update();
+            });
 
-        //console.log(this);
-
-        platforms = this.physics.add.group({
-            allowGravity: false,
-            immovable: true
-        });
-        platforms.create(400, 500 - 35, 'platform').setOrigin(0.5, 1);
-        platforms.create(600, 300 + 15, 'platform').setOrigin(0.5, 1);
-        platforms.create(200, 300 + 15, 'platform').setOrigin(0.5, 1);
-
-        platforms.add(menu);
-
-        this.physics.add.collider(group, platforms);
-
-        shieldButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-
-    }
-
-    function update(time) {
-        // socket.emit('currPosition', { x: <%= currPlayer %>.x, y: <%= currPlayer %>.y });
-        // player1.setVelocity(0);
-
-        sprite.setPosition(<%= currPlayer %>.getCenter().x, <%= currPlayer %>.getCenter().y - 30);
-
-        if (cursors.left.isDown) {
-            socket.emit('move', { action: 'horizontal', dir: -200});
-            <%= currPlayer %>.setVelocityX(-200);
-            curPlayerDirection = false;
         }
-        else if (cursors.right.isDown) {
-            socket.emit('move', { action: 'horizontal', dir: 200});
-            <%= currPlayer %>.setVelocityX(200); 
-            curPlayerDirection  = true;
+
+        function handlerDestroyer(a, b) {
+            a.destroy();
         }
-        else <%= currPlayer %>.setVelocityX(0);
-        
-        if (cursors.up.isDown && (player1.body.onFloor() || player1.body.touching.down)) {
-            socket.emit('move', { action: 'vertical', dir: -600});
-            <%= currPlayer %>.setVelocityY(-600);
-        }
-        
-        if (shieldButton.isDown) {
-            shieldActive = true;
-            if (!sprite.anims.isPlaying){
-                sprite.anims.load('heal');
-                sprite.anims.play('heal');
+
+        function mycollisionHandler(bullet, group) {
+
+            var actual = <%= currPlayer %>;
+            if (actual === player1) {
+                var vidasRestantes = rightHearts.children.entries.length;
+
+                if (vidasRestantes > 0) {
+                    that.sound.add('dieAudio').play();
+                    rightHearts.children.entries[0].destroy();
+                    --vidasRestantes;
+                }
+
+                if (vidasRestantes === 0) {
+                    alert("hey, has ganao pavo, player1");
+                }
+
             }
-        }
-        else shieldActive = false;
-
-        if (cursors.space.isDown && time > this.lastFired)
-        {
-            //console.log(this);
-            var bullet = bullets.get();
-            bullet.setActive(true);
-            bullet.setVisible(true);
-
-            if (bullet)
-            {
-                console.log(this.physics);
-                this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
-                this.physics.add.collider(bullet, platforms, handlerDestroyer);
-                this.sound.add('shootAudio').play();
-                bullet.fire(player1);
-                this.lastFired = time + 300;
-            }
+            bullet.destroy();
         }
 
-        socket.on('move', function (data) {
-            if (data.action === 'horizontal') {
-                if (data.player === 1) player1.setVelocityX(data.dir);
-                else if (data.player === 2) player2.setVelocityX(data.dir);
-            } else if (data.action === 'vertical') {
-                if (data.player === 1) player1.setVelocityY(data.dir);
-                else if (data.player === 2) player2.setVelocityY(data.dir);
-            }
-
-            update();
-        });
-        
-    }
-
-    function handlerDestroyer(a, b) {
-        a.destroy();
-    }
-
-    function mycollisionHandler(bullet, group) {
-
-        var actual = <%= currPlayer %>;
-        if (actual === player1) {
-            var vidasRestantes = rightHearts.children.entries.length;
-
-            if (vidasRestantes > 0) {
-                that.sound.add('dieAudio').play();
-                rightHearts.children.entries[0].destroy();
-                --vidasRestantes;
-            }
-
-            if (vidasRestantes === 0) {
-                alert("hey, has ganao pavo, player1");
-            }
-
-        }
-        bullet.destroy();
-    }
-
-    function notCurrentPlayer() {
-        if (<%= currPlayer %> === player1) return player2;
+        function notCurrentPlayer() {
+            if (<%= currPlayer %> === player1) return player2;
         else return player1;
-    }
-
-    function resize() {
-        var canvas = document.querySelector("canvas");
-        var windowWidth = window.innerWidth;
-        var windowHeight = window.innerHeight;
-        var windowRatio = windowWidth / windowHeight;
-        var gameRatio = game.config.width / game.config.height;
-        if(windowRatio < gameRatio){
-            canvas.style.width = windowWidth + "px";
-            canvas.style.height = (windowWidth / gameRatio) + "px";
         }
-        else{
-            canvas.style.width = (windowHeight * gameRatio) + "px";
-            canvas.style.height = windowHeight + "px";
+
+        function resize() {
+            var canvas = document.querySelector("canvas");
+            var windowWidth = window.innerWidth;
+            var windowHeight = window.innerHeight;
+            var windowRatio = windowWidth / windowHeight;
+            var gameRatio = game.config.width / game.config.height;
+            if (windowRatio < gameRatio) {
+                canvas.style.width = windowWidth + "px";
+                canvas.style.height = (windowWidth / gameRatio) + "px";
+            }
+            else {
+                canvas.style.width = (windowHeight * gameRatio) + "px";
+                canvas.style.height = windowHeight + "px";
+            }
         }
-    }
 
 
-</script>
+    </script>
 </body>

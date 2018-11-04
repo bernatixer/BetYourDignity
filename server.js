@@ -18,6 +18,9 @@ var status = {
     FULL: 2
 };
 
+var hostBiene;
+var visitorBiene;
+
 var game = {};
 
 function getRooms() {
@@ -77,8 +80,15 @@ io.on('connection', function (socket) {
             playing = true;
             socket.emit('setPlayerNum', playerNum);
             io.emit('setRooms', getRooms());
-            io.emit('startGame');
+            io.emit('selectBiene');
         }
+    });
+
+    socket.on('selectBiene', function (biene) {
+        console.log('Biene: ' + biene);
+        if (playerNum == 1) hostBiene = biene;
+        else if (playerNum == 2) visitorBiene = biene;
+        if (hostBiene != null && visitorBiene != null) io.emit('startGame');
     });
 
 });
@@ -90,16 +100,14 @@ app.get('/development', function (req, res) {
 app.get('/play', function (req, res) {
     var playerNum = req.cookies.playerNum;
     if (playerNum != null) {
-        if (playerNum == 1) res.render('play', { currPlayer: "player1" });
-        else if (playerNum == 2) res.render('play', { currPlayer: "player2" });
+        if (playerNum == 1) res.render('play', { currPlayer: "player1", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor });
+        else if (playerNum == 2) res.render('play', { currPlayer: "player2", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor });
     } else res.redirect('/');
 });
 
 app.get('/', function (req, res) {
     res.render('start');
 });
-
-// res.cookie("acces_token", data.access_token, { expire: new Date() + 9999 });
 
 http.listen(process.env.PORT, function () {
     console.log('BetYourDignity running on port ' + process.env.PORT);

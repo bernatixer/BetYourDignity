@@ -11,6 +11,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.1/css/bulma.min.css" />
 
   <style type="text/css">
+    .mySlides {
+      display: none;
+      width: 80%;
+      height: 80%;
+    }
+
     #div1 {
       display: inline-block;
       width: 10vw;
@@ -104,6 +110,56 @@
     </div>
   </section>
 
+  <section id="select" class="hero is-primary is-fullheight has-text-centered" style="display: none;">
+    <div class="hero-body">
+      <div class="container">
+        <div class="columns is-mobile">
+          <div class="column is-half is-offset-one-quarter">
+            <div class="card">
+              <br/>
+              <h1 class="title is-1">
+                <span style="color: #462929">Choose</span>
+                <span style="color: #9f73fc">Your</span>
+                <span style="color: #fc7373">Biene</span>
+              </h1>
+              <div class="w3-content w3-display-container" style="justify-content: center;">
+                <img class="mySlides" name="adria" src="/assets/adria.png">
+                <img class="mySlides" name="alba" src="/assets/alba.png">
+                <img class="mySlides" name="albert" src="/assets/albert.png">
+                <img class="mySlides" name="alvaro" src="/assets/alvaro.png">
+                <img class="mySlides" name="ana" src="/assets/ana.png">
+                <img class="mySlides" name="andrea" src="/assets/andrea.png">
+                <img class="mySlides" name="andreu" src="/assets/andreu.png">
+                <img class="mySlides" name="aslo" src="/assets/aslo.png">
+                <img class="mySlides" name="bernat" src="/assets/bernat.png">
+                <img class="mySlides" name="cori" src="/assets/cori.png">
+                <img class="mySlides" name="david" src="/assets/david.png">
+                <img class="mySlides" name="edgar" src="/assets/edgar.png">
+                <img class="mySlides" name="elena" src="/assets/elena.png">
+                <img class="mySlides" name="faix" src="/assets/faix.png">
+                <img class="mySlides" name="felix" src="/assets/felix.png">
+                <img class="mySlides" name="ferja" src="/assets/ferja.png">
+                <img class="mySlides" name="gorka" src="/assets/gorka.png">
+                <img class="mySlides" name="jona" src="/assets/jona.png">
+                <img class="mySlides" name="maria" src="/assets/maria.png">
+                <img class="mySlides" name="marina" src="/assets/marina.png">
+                <img class="mySlides" name="oriol" src="/assets/oriol.png">
+                <img class="mySlides" name="palo" src="/assets/palo.png">
+                <img class="mySlides" name="pau" src="/assets/pau.png">
+                <img class="mySlides" name="victor" src="/assets/victor.png">
+                <img class="mySlides" name="xavi" src="/assets/xavi.png">
+
+                <button class="w3-button w3-black w3-display-left" onclick="plusDivs(-1)">&#10094;</button>
+                <button class="w3-button w3-black w3-display-right" onclick="plusDivs(1)">&#10095;</button>
+              </div>
+              <button class="w3-button w3-black" onclick="select()">Select</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div id="create_room" class="modal">
     <div class="modal-background"></div>
     <div class="modal-card">
@@ -166,7 +222,12 @@
       }
     };
 
-    socket.on('startGame', function() {
+    socket.on('selectBiene', function () {
+      $('#rooms').hide();
+      $('#select').show();
+    });
+
+    socket.on('startGame', function () {
       window.location.href = location.origin + '/play';
     });
 
@@ -204,6 +265,39 @@
       });
 
     });
+
+    var slideIndex = 1;
+    showDivs(slideIndex);
+
+    function select() {
+      socket.emit('selectBiene', document.getElementsByClassName("mySlides")[slideIndex-1].getAttribute("name"));
+    }
+
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+
+    function showDivs(n) {
+      var i;
+      var x = document.getElementsByClassName("mySlides");
+      if (n > x.length) { slideIndex = 1 }
+      if (n < 1) { slideIndex = x.length }
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
+      }
+      x[slideIndex - 1].style.display = "block";
+    }
+
+  function showDivs(n) {
+    var i;
+    var x = document.getElementsByClassName("mySlides");
+    if (n > x.length) { slideIndex = 1 }
+    if (n < 1) { slideIndex = x.length }
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";
+    }
+    x[slideIndex - 1].style.display = "block";
+  }
   </script>
 </body>
 
