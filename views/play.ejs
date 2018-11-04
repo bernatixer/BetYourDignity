@@ -368,7 +368,9 @@
         function mycollisionHandler(bullet, group) {
             var actual = <%= currPlayer %>;
             index = Math.floor(Math.random() * 100) % 5
+            var ind = bullet.texture.source[0].texture.key.slice(-1);
             if (actual === player1) {
+                socket.emit('hit', hostMedia[ind].id);
                 var vidasRestantes = rightHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
@@ -379,6 +381,7 @@
                     alert("hey, has ganao pavo, player1");
                 }
             } else if (actual === player2) {
+                socket.emit('hit', visitorMedia[ind].id);
                 var vidasRestantes = leftHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
@@ -397,6 +400,7 @@
             var actual = notCurrentPlayer();
 
             if (actual === player1) {
+                socket.emit('hit', hostMedia[ind].id);
                 var vidasRestantes = rightHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
@@ -407,6 +411,7 @@
                     alert("hey, has ganao pavo, player1");
                 }
             } else if (actual === player2) {
+                socket.emit('hit', visitorMedia[ind].id);
                 var vidasRestantes = leftHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();

@@ -98,7 +98,8 @@ io.on('connection', function (socket) {
     });
 
     socket.on('hit', function(mediaId) {
-        like(sessionInfo.sessionId, mediaId);
+        if (playerNum == 1) like(game.sessionId2, mediaId);
+        else like(game.sessionId1, mediaId);
     });
 
 });
