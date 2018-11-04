@@ -308,10 +308,10 @@
                 if (data.action === 'horizontal') {
                     if (data.player == 1) {
                         player1.setVelocityX(data.dir);
-                        curPlayerDirection1 = data.dir >= 0;
+                        if (data.dir != 0) curPlayerDirection1 = data.dir > 0;
                     } else if (data.player == 2) {
                         player2.setVelocityX(data.dir);
-                        curPlayerDirection2 = data.dir >= 0;
+                        if (data.dir != 0) curPlayerDirection2 = data.dir > 0;
                     }
                 } else if (data.action === 'vertical') {
                     if (data.player == 1) player1.setVelocityY(data.dir);
