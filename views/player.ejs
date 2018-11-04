@@ -1,0 +1,123 @@
+<html>
+
+<head>
+  <title>BetYourDignity</title>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.1/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+  <style>
+    .mySlides {display:none;}
+
+    #div1 {
+      display: inline-block;
+      width: 10vw;
+      height: 10vw;
+      background-color: #6469b5;
+    }
+
+    #div2 {
+      display: inline-block;
+      width: 10vw;
+      height: 10vw;
+      background-color: #6469b5;
+    }
+
+    table {
+      table-layout: fixed;
+      background-color: #6469b5;
+    }
+
+    td {
+      width: 33%;
+      height: 33%;
+      background-color: #6469b5;
+    }
+    </style>
+</head>
+
+<body>
+
+  <section id="login" class="hero is-primary is-fullheight has-text-centered">
+    <div class="hero-body">
+      <div class="container">
+        <div class="columns is-mobile">
+          <div class="column is-half is-offset-one-quarter">
+            <div class="card">
+              <br/>
+              <h1 class="title is-1">
+                <span style="color: #462929">Choose</span>
+                <span style="color: #9f73fc">Your</span>
+                <span style="color: #fc7373">Biene</span>
+              </h1>
+              <div class="w3-content w3-display-container" style="justify-content: center;">
+                <img class="mySlides" src="/assets/adria.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/alba.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/albert.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/alvaro.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/ana.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/andrea.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/andreu.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/aslo.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/bernat.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/cori.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/david.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/edgar.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/elena.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/faix.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/felix.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/ferja.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/gorka.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/jona.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/maria.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/marina.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/oriol.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/palo.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/pau.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/victor.png" style="width:80%; height:80%;">
+                <img class="mySlides" src="/assets/xavi.png" style="width:80%; height:80%;">
+
+                <button class="w3-button w3-black w3-display-left" onclick="plusDivs(-1)">&#10094;</button>
+                <button class="w3-button w3-black w3-display-right" onclick="plusDivs(1)">&#10095;</button>
+              </div>
+              <button class="w3-button w3-black" onclick="select()">Select</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+
+    var slideIndex = 1;
+    showDivs(slideIndex);
+
+    function select() {
+
+    }
+
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+
+    function showDivs(n) {
+      var i;
+      var x = document.getElementsByClassName("mySlides");
+      if (n > x.length) {slideIndex = 1}    
+      if (n < 1) {slideIndex = x.length}
+      for (i = 0; i < x.length; i++) {
+         x[i].style.display = "none";  
+      }
+      x[slideIndex-1].style.display = "block";  
+    }
+
+  </script>
+
+
+</body>
+
+</html>
