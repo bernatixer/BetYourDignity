@@ -113,8 +113,8 @@ app.get('/play', function (req, res) {
     if (playerNum != null) {
         getAccountMedia(game.sessionId1, function (hostMedia) {
             getAccountMedia(game.sessionId2, function (visitorMedia) {
-                hostMedia = hostMedia[0].image.url;
-                visitorMedia = visitorMedia[0].image.url;
+                hostMedia = JSON.stringify(hostMedia);
+                visitorMedia = JSON.stringify(visitorMedia);
                 if (playerNum == 1) res.render('play', { currPlayer: "player1", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor, hostMedia: hostMedia, visitorMedia: visitorMedia });
                 else if (playerNum == 2) res.render('play', { currPlayer: "player2", hostBiene: hostBiene, visitorBiene: visitorBiene, hostName: game.host, visitorName: game.visitor, hostMedia: hostMedia, visitorMedia: visitorMedia });
             });

@@ -69,6 +69,9 @@
         var curPlayerDirection1, curPlayerDirection2;
         var that, sprite, platforms, shieldActive;
 
+        var hostMedia = <%= hostMedia %>;
+        var visitorMedia = <%= visitorMedia %>;
+
         function preload() {
             that = this;
             this.load.image('A', '/assetsMini/<%= hostBiene %>.png');
@@ -76,8 +79,8 @@
             this.load.image('heart', 'corazon.png');
             this.load.image('back', 'back.png');
             this.load.image('menu', 'menu.png');
-            this.load.image('hostMedia', '<%= hostMedia %>');
-            this.load.image('visitorMedia', '<%= visitorMedia %>');
+            this.load.image('hostMedia', hostMedia[0].image.url);
+            this.load.image('visitorMedia', visitorMedia[0].image.url);
             this.load.image('platform', 'platform.png');
             this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
             this.load.audio('shootAudio', ['sounds/shoot.mp3']);
