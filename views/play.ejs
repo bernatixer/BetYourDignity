@@ -28,13 +28,13 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        var socket = io();
         window.onload = function () {
             window.focus()
             resize();
             window.addEventListener("resize", resize, false);
         }
 
-        var socket = io();
         var config = {
             type: Phaser.AUTO,
             width: 800,
@@ -241,9 +241,6 @@
         }
 
         function update(time) {
-            // socket.emit('currPosition', { x: <%= currPlayer %>.x, y: <%= currPlayer %>.y });
-            // player1.setVelocity(0);
-
             sprite.setPosition(<%= currPlayer %>.getCenter().x, <%= currPlayer %>.getCenter().y - 30);
 
             if (cursors.left.isDown) {
@@ -251,14 +248,15 @@
                 <%= currPlayer %>.setVelocityX(-200);
                 if (<%= currPlayer %> === player1) curPlayerDirection1 = false;
                 if (<%= currPlayer %> === player2) curPlayerDirection2 = false;
-            }
-            else if (cursors.right.isDown) {
+            } else if (cursors.right.isDown) {
                 socket.emit('move', { action: 'horizontal', dir: 200 });
                 <%= currPlayer %>.setVelocityX(200);
                 if (<%= currPlayer %> === player1) curPlayerDirection1 = true;
                 if (<%= currPlayer %> === player2) curPlayerDirection2 = true;
+            } else {
+                socket.emit('move', { action: 'horizontal', dir: 0 });
+                <%= currPlayer %>.setVelocityX(0);
             }
-            else <%= currPlayer %>.setVelocityX(0);
 
             if (cursors.up.isDown && (<%= currPlayer %>.body.onFloor() || <%= currPlayer %>.body.touching.down)) {
                 socket.emit('move', { action: 'vertical', dir: -600 });
@@ -278,7 +276,7 @@
             if (cursors.space.isDown && time > this.lastFired) {
                 playerFire(<%= currPlayer %>, this, true);
             }
-            
+
             function playerFire(player, dis, emit) {
                 var bullet = bullets.get();
                 bullet.setActive(true);
@@ -294,25 +292,27 @@
                 }
             }
 
+            function middleWare(player, emit) {
+                playerFire(player, this, emit);
+            }
+
             socket.on('fire', function () {
-                playerFire(notCurrentPlayer, this, false);
+                middleWare(notCurrentPlayer(), false);
             })
 
             socket.on('move', function (data) {
                 if (data.action === 'horizontal') {
-                    if (data.player === 1) {
-                        <%= currPlayer %>.setVelocityX(data.dir);
+                    if (data.player == 1) {
+                        player1.setVelocityX(data.dir);
                         curPlayerDirection1 = data.dir >= 0;
-                    } else if (data.player === 2) {
+                    } else if (data.player == 2) {
                         player2.setVelocityX(data.dir);
                         curPlayerDirection2 = data.dir >= 0;
                     }
                 } else if (data.action === 'vertical') {
-                    if (data.player === 1) <%= currPlayer %>.setVelocityY(data.dir);
-                    else if (data.player === 2) player2.setVelocityY(data.dir);
+                    if (data.player == 1) player1.setVelocityY(data.dir);
+                    else if (data.player == 2) player2.setVelocityY(data.dir);
                 }
-
-                // update();
             });
 
         }
@@ -342,7 +342,7 @@
 
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
-                    leftHearts.children.entries[vidasRestantes-1].destroy();
+                    leftHearts.children.entries[vidasRestantes - 1].destroy();
                     --vidasRestantes;
                 }
 

@@ -28,14 +28,15 @@ function getRooms() {
 }
 
 io.on('connection', function (socket) {
-    var sessionInfo;
-    var playerNum;
     var playing = false;
+    var sessionInfo;
+    var socketCookie = socket.handshake.headers.cookie;
+    var playerNum;
     io.emit('setRooms', getRooms());
 
-    var socketCookie = socket.handshake.headers.cookie;
     if (socketCookie != null) {
         var cookieInfo = cookie.parse(socketCookie).sessionId;
+        playerNum = cookie.parse(socketCookie).playerNum;
         if (cookieInfo != null) sessionInfo = JSON.parse(cookieInfo);
     }
 
