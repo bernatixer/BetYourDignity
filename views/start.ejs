@@ -230,7 +230,7 @@
     });
 
     socket.on('startGame', function () {
-       = location.origin + '/play';
+      window.location.href = location.origin + '/play';
     });
 
     function joinRoom(roomName) {
