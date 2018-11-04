@@ -333,7 +333,13 @@
 
                 if (bullet) {
                     if (emit) socket.emit('fire');
-                    dis.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
+                    if (emit) dis.physics.add.collider(bullet, group, mycollisionHandler);
+                    else {
+                        console.log(time + " " + lastMinusLife);
+                        cmamo = time;
+                        if (time > lastMinusLife) dis.physics.add.collider(bullet, group, mycollisionHandler2);
+                        lastMinusLife = cmamo + 500;
+                    }
                     dis.physics.add.collider(bullet, platforms, handlerDestroyer);
                     dis.sound.add('shootAudio').play();
                     bullet.fire(player);
@@ -344,16 +350,22 @@
         }
 
         socket.on('sendBullet', function () {
-            SocketplayerFire(notCurrentPlayer(), they);
+            SocketplayerFire(notCurrentPlayer(), they, false);
         })
 
-        function SocketplayerFire(player, dis) {
+        function SocketplayerFire(player, dis, emit) {
             var bullet = bullets.get();
             bullet.setActive(true);
             bullet.setVisible(true);
 
             if (bullet) {
-                dis.physics.add.collider(bullet, player, mycollisionHandler2);
+                console.log('testerino');
+                console.log(dis);
+                if (emit) dis.physics.add.collider(bullet, group, mycollisionHandler);
+                else {
+                   dis.physics.add.collider(bullet, group, mycollisionHandler2);
+                   lastMinusLife = cmamo + 500;
+                }
                 dis.physics.add.collider(bullet, platforms, handlerDestroyer);
                 dis.sound.add('shootAudio').play();
                 bullet.fire(player);
@@ -398,9 +410,9 @@
 
         function mycollisionHandler2(bullet, group) {
             var actual = notCurrentPlayer();
-
+            //var ind = bullet.texture.source[0].texture.key.slice(-1);
             if (actual === player1) {
-                socket.emit('hit', hostMedia[ind].id);
+                //socket.emit('hit', hostMedia[ind].id);
                 var vidasRestantes = rightHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
@@ -411,7 +423,7 @@
                     alert("hey, has ganao pavo, player1");
                 }
             } else if (actual === player2) {
-                socket.emit('hit', visitorMedia[ind].id);
+                //socket.emit('hit', visitorMedia[ind].id);
                 var vidasRestantes = leftHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
