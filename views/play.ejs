@@ -232,12 +232,12 @@
                 this.speed = Phaser.Math.GetSpeed(-bulletSpeed, 1);
             }
             else if (player === player2 && curPlayerDirection2){
-                this.setPosition(player.x-60, player.y);
-                this.speed = Phaser.Math.GetSpeed(-bulletSpeed, 1);
-            }
-            else if (player === player2 && !curPlayerDirection2){
                 this.setPosition(player.x+60, player.y);
                 this.speed = Phaser.Math.GetSpeed(bulletSpeed, 1);
+            }
+            else if (player === player2 && !curPlayerDirection2){
+                this.setPosition(player.x-60, player.y);
+                this.speed = Phaser.Math.GetSpeed(-bulletSpeed, 1);
             }
             this.body.allowGravity = false;
             this.born = 0;
