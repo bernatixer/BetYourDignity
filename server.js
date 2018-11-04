@@ -18,22 +18,24 @@ var status = {
     FULL: 2
 };
 
-var game = {
-    status: status.EMPTY
-};
+var game = {};
 
 function getRooms() {
-    return [
-        game
-    ];
+    return game;
 }
 
 io.on('connection', function (socket) {
-    socket.emit('setRooms', getRooms());
-    var token = cookie.parse(socket.handshake.headers.cookie).acces_token;
-    var playerNum = game[token];
     var sessionInfo;
-    
+    var playerNum;
+    var playing = false;
+    io.emit('setRooms', getRooms());
+
+    var socketCookie = socket.handshake.headers.cookie;
+    if (socketCookie != null) {
+        var cookieInfo = cookie.parse(socketCookie).sessionId;
+        if (cookieInfo != null) sessionInfo = JSON.parse(cookieInfo);
+    }
+
     socket.on('move', function (data) {
         if (data.action == 'horizontal') {
             if (playerNum == 1) socket.broadcast.emit('move', { action: 'horizontal', player: playerNum, dir: data.dir });
@@ -41,64 +43,64 @@ io.on('connection', function (socket) {
         } else if (data.action == 'vertical') {
             if (playerNum == 1) socket.broadcast.emit('move', { action: 'vertical', player: playerNum, dir: data.dir });
             else if (playerNum == 2) socket.broadcast.emit('move', { action: 'vertical', player: playerNum, dir: data.dir });
-        } 
+        }
     });
 
     socket.on('loggin', function (data) {
-        login(data.username, data.password, function(sessionAccount) {
+        login(data.username, data.password, function (sessionAccount) {
             sessionInfo = sessionAccount;
-            socket.emit('loggin', { sessionId: sessionAccount.sessionId, rooms: getRooms() });
+            socket.emit('loggin', { sessionId: sessionAccount, rooms: getRooms() });
         })
     });
 
     socket.on('newRoom', function (roomName) {
         game.name = roomName;
         game.img = sessionInfo.account.profilePicture.url;
-        game.username = sessionInfo.account.username;
-        if (game.status == status.EMPTY) {
-            game[token] = 1;
-            game.status = status.WAITING;
-        } else if (game.status == status.WAITING) {
-            game[token] = 2;
-            game.status = status.FULL;
-        }
-        socket.emit('setRooms', getRooms());
+        game.host = sessionInfo.account.username;
+        game.status = status.WAITING;
+        game[sessionInfo.sessionId] = 1;
+        game.visitor = "";
+        game.playerNum = 1;
+        playerNum = 1;
+        playing = true;
+        socket.emit('setPlayerNum', playerNum);
+        io.emit('setRooms', getRooms());
     });
 
-});
+    socket.on('joinRoom', function (roomName) {
+        if (game.status == status.WAITING && !playing) {
+            game.status = status.FULL;
+            game[sessionInfo.sessionId] = 2;
+            game.visitor = sessionInfo.account.username;
+            game.playerNum = 2;
+            playerNum = 2;
+            playing = true;
+            socket.emit('setPlayerNum', playerNum);
+            io.emit('setRooms', getRooms());
+            io.emit('startGame');
+        }
+    });
 
-app.get('/home', function (req, res) {
-    res.render('index');
 });
 
 app.get('/development', function (req, res) {
     res.render('play', { currPlayer: "player1" });
 });
 
+app.get('/play', function (req, res) {
+    var playerNum = req.cookies.playerNum;
+    if (playerNum != null) {
+        if (playerNum == 1) res.render('play', { currPlayer: "player1" });
+        else if (playerNum == 2) res.render('play', { currPlayer: "player2" });
+    } else res.redirect('/');
+});
+
 app.get('/', function (req, res) {
-    var token = req.cookies.acces_token;
-    if (token != null) {
-        if (game.status == status.EMPTY) {
-            game[token] = 1;
-            game.status = status.WAITING;
-        } else if (game.status == status.WAITING) {
-            game[token] = 2;
-            game.status = status.FULL;
-        }
-        if (game[token] == 1) {
-            res.render('play', { currPlayer: "player1" });
-        } else if (game[token] == 2) {
-            res.render('play', { currPlayer: "player2" });
-        } else {
-            res.render('start'); // Game full
-        }
-    } else {
-        res.render('start');
-    }
+    res.render('start');
 });
 
 // res.cookie("acces_token", data.access_token, { expire: new Date() + 9999 });
 
-http.listen(process.env.PORT , function () {
-  console.log('BetYourDignity running on port ' + process.env.PORT);
+http.listen(process.env.PORT, function () {
+    console.log('BetYourDignity running on port ' + process.env.PORT);
 });

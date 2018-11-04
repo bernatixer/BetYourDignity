@@ -85,40 +85,7 @@
         <p>
           <h1 class="title is-1">Rooms</h1>
         </p>
-        <div id="rooms_list">
-
-          <a id="sphynxsheldon" name="join_room" onclick="joinRoom('sphynxsheldon')">
-            <div class="box">
-              <article class="media">
-                <div class="media-left">
-                  <figure class="image is-64x64">
-                    <figure class="image is-64x64" style="background-color: #05cf05;"></figure>
-                  </figure>
-                </div>
-                <div class="media-content">
-                  <div class="content">
-                    <p>
-                      <strong>Sphynx's game</strong>
-                      <small>waiting</small>
-                      <br>
-                      <strong>Player 1:</strong> sphynxsheldon
-                      <br>
-                      <strong>Player 2:</strong>
-                    </p>
-                  </div>
-                </div>
-                <div class="media-right">
-                  <br/>
-                  <span style="color: black">
-                    <i class="fa fa-play"></i>
-                  </span>
-                </div>
-              </article>
-            </div>
-          </a>
-
-          <br/>
-        </div>
+        <div id="rooms_list"></div>
       </div>
     </div>
 
@@ -174,33 +141,40 @@
       $('#login').hide();
       $('#rooms').show();
       setRooms(data.rooms);
-      document.cookie = "sessionId=" + data.sessionId;
+      document.cookie = "sessionId=" + JSON.stringify(data.sessionId);
     });
     socket.on('setRooms', function (rooms) {
       setRooms(rooms);
     })
+    socket.on('setPlayerNum', function (playerNum) {
+      document.cookie = "playerNum=" + playerNum;
+    })
 
     function setRooms(rooms) {
       console.log(rooms);
+      var room = rooms;
       $('#rooms_list').text('');
-      for (let i = 0; i < rooms.length; ++i) {
-      $('#rooms_list').append('<a id="' + room.username + '" name="join_room" onclick="joinRoom(' + room.username + ')">' +
-        '<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">' +
-        '<figure class="image is-64x64"><img src="' + room.img + '" /></figure></figure>' +
-        '</div><div class="media-content"><div class="content"><p><strong>' + room.name + '</strong> <small>waiting</small><br>' +
-        '<strong>Player 1:</strong> ' + room.username + '<br><strong>Player 2:</strong> ' + "" + '</p></div></div><div class="media-right"><br/>' +
-        '<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>'); 
+      if (Object.keys(room).length != 0) {
+        if (room.status == 1) room.status = 'waiting';
+        if (room.status == 2) room.status = 'playing';
+        $('#rooms_list').append('<a id="' + room.name + '" name="join_room" onclick="joinRoom(' + room.name + ')">' +
+          '<div class="box"><article class="media"><div class="media-left"><figure class="image is-64x64">' +
+          '<figure class="image is-64x64"><img src="' + room.img + '" /></figure></figure></div><div class="media-content">' +
+          '<div class="content"><p><strong>' + room.name + '</strong> <small>' + room.status + '</small><br><strong>' +
+          'Player 1:</strong> ' + room.host + '<br><strong>Player 2:</strong> ' + room.visitor + '</p></div></div><div class="media-right"><br/>' +
+          '<span style="color: black"><i class="fa fa-play"></i></span></div></article></div></a>');
       }
     };
 
-    jQuery(document).ready(function ($) {
+    socket.on('startGame', function() {
+      window.location.href = location.origin + '/play';
+    });
 
-      $('#loader_content').keypress(function (e) {
-        if (e.which == 13) {
-          $('#loader_content').hide();
-          $('#loader').show();
-        }
-      });
+    function joinRoom(roomName) {
+      socket.emit('joinRoom', roomName);
+    }
+
+    jQuery(document).ready(function ($) {
 
       $('.modal-button').click(function () {
         var target = $(this).data('target');
@@ -226,6 +200,7 @@
 
       $('#create_room_button').on('click', function (e) {
         socket.emit('newRoom', $('#room_name').val());
+        $('#create_room').removeClass('is-active');
       });
 
     });
