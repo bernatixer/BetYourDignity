@@ -227,13 +227,17 @@
                 this.setPosition(player.x+60, player.y);
                 this.speed = Phaser.Math.GetSpeed(bulletSpeed, 1);
             } 
-            else if (player === player2 && curPlayerDirection2){
+            else if (player === player1 && !curPlayerDirection1){
                 this.setPosition(player.x+60, player.y);
-                this.speed = Phaser.Math.GetSpeed(bulletSpeed, 1);
+                this.speed = Phaser.Math.GetSpeed(-bulletSpeed, 1);
             }
-            else {
+            else if (player === player2 && curPlayerDirection2){
                 this.setPosition(player.x-60, player.y);
                 this.speed = Phaser.Math.GetSpeed(-bulletSpeed, 1);
+            }
+            else if (player === player2 && !curPlayerDirection2){
+                this.setPosition(player.x-60, player.y);
+                this.speed = Phaser.Math.GetSpeed(bulletSpeed, 1);
             }
             this.body.allowGravity = false;
             this.born = 0;
@@ -411,6 +415,7 @@
         }
 
         function mycollisionHandler2(bullet, group) {
+            console.log('caca');
             var actual = notCurrentPlayer();
             //var ind = bullet.texture.source[0].texture.key.slice(-1);
             if (actual === player1) {
