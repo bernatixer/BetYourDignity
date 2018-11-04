@@ -44,7 +44,7 @@
             arcade: {
                 // debug: true,
                 gravity: {y: 600}
-            }
+            },
         },
         audio: {
             // disableWebAudio: true
@@ -66,7 +66,7 @@
     var leftHearts, rightHearts;
     var leftScore, rightScore;
     var curPlayerDirection; 
-    var that, sprite;
+    var that, sprite, platforms;
 
     function preload() {
         that = this;
@@ -75,6 +75,7 @@
         this.load.image('heart', 'corazon.png');
         this.load.image('back', 'back.png');
         this.load.image('menu', 'menu.png');
+        this.load.image('platform', 'platform.png');
         this.load.audio('bgAudio', ['sounds/bg.ogg', 'sounds/bg.mp3']);
         this.load.audio('shootAudio', ['sounds/shoot.mp3']);
         this.load.audio('dieAudio', ['sounds/muerte.mp3']);
@@ -113,20 +114,20 @@
         // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
 
         group = this.physics.add.group({
-            bounceX: false,
+            bounceX: true,
             bounceY: false,
             collideWorldBounds: true,
             collide: true,
         });
 
         var fondo = this.add.tileSprite(600, 400, 0, 0, 'back').setScale(0.8);
-        fondo.alpha = 0.15;
+        fondo.alpha = 0.25;
 
         var menu = this.add.tileSprite(400, 60, 0, 0, 'menu');
 
 
-        player1 = group.create(200, 300, "A");
-        player2 = group.create(500, 500, "B");
+        player1 = group.create(200, 200, "A");
+        player2 = group.create(600, 550, "B");
 
         // player1.body.immovable = true;
         player2.body.immovable = true;
@@ -232,6 +233,20 @@
 
         //console.log(this);
 
+        platforms = this.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
+        platforms.create(400, 500 - 35, 'platform').setOrigin(0.5, 1);
+        platforms.create(600, 300 + 15, 'platform').setOrigin(0.5, 1);
+        platforms.create(200, 300 + 15, 'platform').setOrigin(0.5, 1);
+
+        platforms.add(menu);
+
+        this.physics.add.collider(group, platforms);
+
+
+
     }
 
     function update(time) {
@@ -269,6 +284,7 @@
             {
                 console.log(this.physics);
                 this.physics.add.collider(bullet, notCurrentPlayer(), mycollisionHandler);
+                this.physics.add.collider(bullet, platforms, handlerDestroyer);
                 this.sound.add('shootAudio').play();
                 bullet.fire(player1);
                 this.lastFired = time + 300;
@@ -295,6 +311,9 @@
         // }
     }
 
+    function handlerDestroyer(a, b) {
+        a.destroy();
+    }
 
     function mycollisionHandler(bullet, group) {
 
