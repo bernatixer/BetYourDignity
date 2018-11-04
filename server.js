@@ -51,7 +51,6 @@ io.on('connection', function (socket) {
     });
 
     socket.on('fire', function () {
-        console.log('serversito');
         socket.broadcast.emit('sendBullet');
     })
 
@@ -93,7 +92,6 @@ io.on('connection', function (socket) {
     });
 
     socket.on('selectBiene', function (biene) {
-        console.log('Biene: ' + biene);
         if (playerNum == 1) hostBiene = biene;
         else if (playerNum == 2) visitorBiene = biene;
         if (hostBiene != null && visitorBiene != null) io.emit('startGame');
