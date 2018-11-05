@@ -69,6 +69,7 @@
         var that, sprite, platforms, shieldActive;
         var they, lastMinusLife = 0, cmamo = 0, emit2;
         var bulletSpeed = 1000;
+        var enemyShooting = false;
 
         var hostMedia = <%- hostMedia %>;
         var visitorMedia = <%- visitorMedia %>;
@@ -210,8 +211,8 @@
                 initialize:
 
                     function Bullet(scene) {
-                        if (<%= currPlayer %> == player1) Phaser.GameObjects.Image.call(this, scene, 0, 0, 'hostMedia' + index);
-                        if (<%= currPlayer %> == player2) Phaser.GameObjects.Image.call(this, scene, 0, 0, 'visitorMedia' + index);
+                        if (!enemyShooting) Phaser.GameObjects.Image.call(this, scene, 0, 0, 'hostMedia' + index);
+                        else Phaser.GameObjects.Image.call(this, scene, 0, 0, 'visitorMedia' + index);
                         this.speed = 0;
                         this.born = 0;
                         index = (index + 1) % 5;
@@ -333,6 +334,8 @@
             }
 
             function playerFire(player, dis, emit) {
+                enemyShooting = (player != <%= currPlayer %>);
+
                 var bullet = bullets.get();
                 bullet.setActive(true);
                 bullet.setVisible(true);
@@ -360,6 +363,8 @@
         })
 
         function SocketplayerFire(player, dis, emit) {
+            enemyShooting = (player != <%= currPlayer %>);
+
             var bullet = bullets.get();
             bullet.setActive(true);
             bullet.setVisible(true);
@@ -387,7 +392,7 @@
             var actual = <%= currPlayer %>;
             var ind = bullet.texture.source[0].texture.key.slice(-1);
             if (actual === player1) {
-                socket.emit('hit', hostMedia[ind].id);
+                //socket.emit('hit', hostMedia[ind].id);
                 var vidasRestantes = rightHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
@@ -398,7 +403,7 @@
                     window.location.href = location.origin + '/winner';
                 }
             } else if (actual === player2) {
-                socket.emit('hit', visitorMedia[ind].id);
+                //socket.emit('hit', visitorMedia[ind].id);
                 var vidasRestantes = leftHearts.children.entries.length;
                 if (vidasRestantes > 0) {
                     that.sound.add('dieAudio').play();
